@@ -10,15 +10,18 @@ describe Carbon do
 
   describe 'usage' do
     it 'should be simple' do
+      pending "Andy's ideas"
       flight = Carbon::Flight.new
       flight.airports = ['DTW','MSP','SFO']
     end
     it 'should return the typical american footprint for an activity' do
+      pending "Andy's ideas"
       typical = Carbon::Diet.new
       typical.calculate!
       typical.footprint.should be_a_kind_of(Numeric)
     end
     it 'should use a dsl' do
+      pending "Andy's ideas"
       include Carbon::DSL
 
       my_flight = flight do
@@ -40,6 +43,7 @@ describe Carbon do
       my_trip.footprint.should be_a_kind_of(Numeric)
     end
     it 'should allow me to fetch valid airport codes' do
+      pending "Andy's ideas"
       airports = Carbon::FlightOption::Airport.all
       detroit = Carbon::FlightOption::Airport.find(:city => 'Detroit')
       seattle = Carbon::FlightOption::Airport.find_all(:city => 'Seattle')
