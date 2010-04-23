@@ -13,5 +13,6 @@ Gem::Specification.new do |s|
   ]
   s.files = Dir.glob('lib/**/*') 
 
-  s.add_runtime_dependency('httparty')
+  s.add_runtime_dependency('rest-client')
+  s.add_development_dependency('fakeweb')
 end
