@@ -9,5 +9,12 @@ module Carbon
     def api_key=(val)
       @api_key = val
     end
+
+    def base_url
+      @base_url ||= 'http://carbon.brighterplanet.com'
+    end
+    def base_url=(val)
+      @base_url = val
+    end
   end
 end

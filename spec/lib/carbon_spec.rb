@@ -8,6 +8,12 @@ describe Carbon do
     end
   end
 
+  describe '.base_url' do
+    it 'should store the service base URL' do
+      Carbon.base_url.should == 'http://carbon.brighterplanet.com'
+    end
+  end
+
   describe 'usage' do
     it 'should be simple' do
       pending "Andy's ideas"
