@@ -1,5 +1,5 @@
 require 'carbon/emitter'
-require 'carbon/flight'
+require 'carbon/emissions_calculation'
 
 module Carbon
   class << self

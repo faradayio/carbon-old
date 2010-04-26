@@ -16,37 +16,23 @@ describe Carbon do
 
   describe 'usage' do
     it 'should be simple' do
-      pending "Andy's ideas"
-      flight = Carbon::Flight.new
-      flight.airports = ['DTW','MSP','SFO']
-    end
-    it 'should return the typical american footprint for an activity' do
-      pending "Andy's ideas"
-      typical = Carbon::Diet.new
-      typical.calculate!
-      typical.footprint.should be_a_kind_of(Numeric)
-    end
-    it 'should use a dsl' do
-      pending "Andy's ideas"
-      include Carbon::DSL
+      class RentalCar
+        include Carbon::Emitter
 
-      my_flight = flight do
-        start 'DTW'
-        stop 'MSP'
-        plane 'Boeing 767'
-      end
+        attr_accessor :model, :model_year, :fuel_economy
 
-      my_trip = trip do
-        flight do
-          start city('Amsterdam')
-        end
-        drive
-        train do
-          start 'LNS'
-          stop 'CHI'
+        emits_as :automobile do
+          provides :model
+          provides :model_year
+          provides :fuel_efficiency, :as => :fuel_economy
         end
       end
-      my_trip.footprint.should be_a_kind_of(Numeric)
+
+      rc = RentalCar.new
+      rc.model = 'Acura'
+      rc.model_year = 2003
+      rc.fuel_economy = 32
+      rc.emissions.value.should == 184
     end
     it 'should allow me to fetch valid airport codes' do
       pending "Andy's ideas"
