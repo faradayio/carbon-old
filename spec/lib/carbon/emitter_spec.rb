@@ -7,9 +7,9 @@ class Bazaar
 
   emits_as :residence do
     provides :zip_code
-    provides :ownership, :as => :owned
+    provides :ownership, :with => :owned
     provides :residents
-    provides :floorspace_estimate, :as => :square_feet
+    provides :floorspace_estimate, :with => :square_feet
   end
 end
 

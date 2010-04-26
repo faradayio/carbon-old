@@ -10,7 +10,7 @@ describe Carbon::Emitter::Options do
       options[:date].should be_an_instance_of(Carbon::Emitter::Characteristic)
     end
     it 'should store options for a given field' do
-      options.provides :time_of_day, :as => :flight_date
+      options.provides :time_of_day, :with => :flight_date
       options[:time_of_day].field.should == :flight_date
     end
   end

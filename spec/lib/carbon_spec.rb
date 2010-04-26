@@ -24,7 +24,7 @@ describe Carbon do
         emits_as :automobile do
           provides :model
           provides :model_year
-          provides :fuel_efficiency, :as => :fuel_economy
+          provides :fuel_efficiency, :with => :fuel_economy
         end
       end
       stub_rest_client

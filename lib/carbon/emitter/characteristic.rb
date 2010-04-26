@@ -4,7 +4,7 @@ module Carbon
       attr_accessor :name, :field
 
       def self.from_options_hash(name, options)
-        new(:name => name, :field => options[:as])
+        new(:name => name, :field => options[:with])
       end
 
       def initialize(options = {})
