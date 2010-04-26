@@ -21,7 +21,10 @@ describe Carbon::Emitter do
       emitter.emissions.should be_a_kind_of(Carbon::EmissionsCalculation)
     end
     it 'should send the correct options to the emission calculation' do
-      Carbon::EmissionsCalculation.should_receive(:new).with(Bazaar.emitter_options, emitter)
+      mock_calc = mock(Carbon::EmissionsCalculation, :calculate! => true)
+      Carbon::EmissionsCalculation.should_receive(:new).
+        with(Bazaar.emitter_options, emitter).
+        and_return(mock_calc)
       emitter.emissions
     end
   end

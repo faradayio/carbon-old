@@ -10,7 +10,10 @@ module Carbon
     end
 
     def emissions
-      @emissions ||= Carbon::EmissionsCalculation.new(self.class.emitter_options, self)
+      return @emissions unless @emissions.nil?
+      @emissions = Carbon::EmissionsCalculation.new(self.class.emitter_options, self)
+      @emissions.calculate!
+      @emissions
     end
   end
 end

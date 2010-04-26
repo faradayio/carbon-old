@@ -27,19 +27,13 @@ describe Carbon do
           provides :fuel_efficiency, :as => :fuel_economy
         end
       end
+      stub_rest_client
 
       rc = RentalCar.new
       rc.model = 'Acura'
       rc.model_year = 2003
       rc.fuel_economy = 32
-      rc.emissions.value.should == 184
-    end
-    it 'should allow me to fetch valid airport codes' do
-      pending "Andy's ideas"
-      airports = Carbon::FlightOption::Airport.all
-      detroit = Carbon::FlightOption::Airport.find(:city => 'Detroit')
-      seattle = Carbon::FlightOption::Airport.find_all(:city => 'Seattle')
-      flight = Carbon::Flight.new(:to => seattle, :from => detroit)
+      rc.emissions.value.should == 134.599
     end
   end
 end
