@@ -33,7 +33,7 @@ describe Carbon do
       rc.model = 'Acura'
       rc.model_year = 2003
       rc.fuel_economy = 32
-      rc.emissions.value.should == 134.599
+      rc.emission.value.should == 134.599
     end
   end
 end

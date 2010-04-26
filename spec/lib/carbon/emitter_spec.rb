@@ -16,16 +16,16 @@ end
 describe Carbon::Emitter do
   let(:emitter) { Bazaar.new }
 
-  describe '#emissions' do
+  describe '#emission' do
     it 'should return an instance of an emissions calculation' do
-      emitter.emissions.should be_a_kind_of(Carbon::EmissionsCalculation)
+      emitter.emission.should be_a_kind_of(Carbon::EmissionsCalculation)
     end
     it 'should send the correct options to the emission calculation' do
       mock_calc = mock(Carbon::EmissionsCalculation, :calculate! => true)
       Carbon::EmissionsCalculation.should_receive(:new).
         with(Bazaar.emitter_options, emitter).
         and_return(mock_calc)
-      emitter.emissions
+      emitter.emission
     end
   end
 end

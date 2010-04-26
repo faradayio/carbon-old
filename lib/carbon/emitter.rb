@@ -9,11 +9,11 @@ module Carbon
       target.extend Carbon::Emitter::ClassMethods
     end
 
-    def emissions
-      return @emissions unless @emissions.nil?
-      @emissions = Carbon::EmissionsCalculation.new(self.class.emitter_options, self)
-      @emissions.calculate!
-      @emissions
+    def emission
+      return @emission unless @emission.nil?
+      @emission = Carbon::EmissionsCalculation.new(self.class.emitter_options, self)
+      @emission.calculate!
+      @emission
     end
   end
 end
