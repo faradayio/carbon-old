@@ -1,4 +1,3 @@
-require 'carbon/resource'
 require 'carbon/emitter/class_methods'
 
 module Carbon
