@@ -1,3 +1,5 @@
+$:.unshift(File.dirname(__FILE__)) unless $:.include?(File.dirname(__FILE__))
+
 require 'carbon/emitter'
 require 'carbon/emissions_calculation'
 

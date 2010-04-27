@@ -1,6 +1,6 @@
 require 'uri'
 require 'rest_client'
-require 'activesupport'
+require 'active_support'
 
 module Carbon
   class EmissionsCalculation
