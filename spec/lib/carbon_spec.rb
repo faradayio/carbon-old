@@ -27,7 +27,7 @@ describe Carbon do
           provides :fuel_efficiency, :with => :fuel_economy
         end
       end
-      stub_rest_client
+      stub_http
 
       rc = RentalCar.new
       rc.model = 'Acura'

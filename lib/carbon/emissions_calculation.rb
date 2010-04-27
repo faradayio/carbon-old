@@ -1,6 +1,6 @@
 require 'uri'
-require 'rest_client'
-require 'active_support'
+require 'active_support/inflector'
+require 'net/http'
 
 module Carbon
   class EmissionsCalculation
@@ -33,11 +33,6 @@ module Carbon
       @result
     end
 
-    def resource
-      url = URI.join(Carbon.base_url, options.emitter_type.to_s.pluralize)
-      @resource ||= RestClient::Resource.new(url.to_s)
-    end
-
     def fields
       options.characteristics.inject({}) do |hsh, characteristic|
         hsh[characteristic.name] = source.send(characteristic.field)
@@ -46,7 +41,11 @@ module Carbon
     end
 
     def fetch_calculation
-      response = resource.post fields, :accept => :json
+      url = URI.join(Carbon.base_url, options.emitter_type.to_s.pluralize)
+      request = Net::HTTP::Post.new(url.path, 'Accept' => 'application/json')
+      request.set_form_data(fields)
+      response = Net::HTTP.new(url.host).start { |http| http.request(request) }
+
       @result = JSON.parse(response.body)
     end
   end

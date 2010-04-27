@@ -1,6 +1,7 @@
 require 'fakeweb'
+require 'json'
 
-def stub_rest_client
+def stub_http
   response = { 
     'emission' => 134.599,
     'methodology' => 'http://carbon.brighterplanet.com/something' }
