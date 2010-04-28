@@ -18,6 +18,7 @@ describe Carbon::Emitter do
 
   describe '#emission' do
     it 'should return an instance of an emissions calculation' do
+      stub_http
       emitter.emission.should be_a_kind_of(Carbon::EmissionsCalculation)
     end
     it 'should send the correct options to the emission calculation' do

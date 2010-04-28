@@ -1,10 +1,13 @@
 require 'uri'
 require 'active_support/inflector'
-require 'net/http'
+require 'httparty'
 
 module Carbon
   class EmissionsCalculation
     class NotYetCalculated < StandardError; end
+    class CalculationRequestFailed < StandardError; end
+
+    include HTTParty
 
     attr_accessor :options, :source, :value, :methodology_url
 
@@ -34,17 +37,21 @@ module Carbon
     end
 
     def fields
-      options.characteristics.inject({}) do |hsh, characteristic|
-        hsh[characteristic.name] = source.send(characteristic.field)
+      fields_hash = options.characteristics.inject({}) do |hsh, characteristic|
+        hsh[characteristic.name.to_sym] = source.send(characteristic.field)
         hsh
       end
+      { :body => { options.emitter_type => fields_hash } }
     end
 
     def fetch_calculation
       url = URI.join(Carbon.base_url, options.emitter_type.to_s.pluralize)
-      request = Net::HTTP::Post.new(url.path, 'Accept' => 'application/json')
-      request.set_form_data(fields)
-      response = Net::HTTP.new(url.host).start { |http| http.request(request) }
+      options = fields.merge(:headers => { 'Accept' => 'application/json' }) 
+      response = self.class.post(url.to_s, options)
+
+      unless (200..399).include?(response.code)
+        raise CalculationRequestFailed, response.body
+      end
 
       @result = JSON.parse(response.body)
     end
