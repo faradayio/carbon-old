@@ -53,6 +53,8 @@ module Carbon
         raise CalculationRequestFailed, response.body
       end
 
+      puts response.body if Carbon.debug
+
       @result = JSON.parse(response.body)
     end
   end

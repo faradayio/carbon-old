@@ -18,5 +18,12 @@ module Carbon
     def base_url=(val)
       @base_url = val
     end
+
+    def debug=(val)
+      @debug = val
+    end
+    def debug
+      @debug ||= false
+    end
   end
 end
