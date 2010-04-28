@@ -2,6 +2,13 @@ require 'spec_helper'
 
 class DonutFactory
   include Carbon::Emitter
+
+  attr_accessor :smokestack_size, :oven_count
+
+  emits_as :factory do
+    provides :smokestack_size
+    provides :oven_count
+  end
 end
 
 describe Carbon::EmissionsCalculation do
@@ -22,6 +29,7 @@ describe Carbon::EmissionsCalculation do
       calculation.methodology_url.should == 'http://foo/bar'
     end
   end
+
   describe '#value' do
     it 'should raise an error if no calculation has been performed' do
       expect { calculation.value }.to raise_error(Carbon::EmissionsCalculation::NotYetCalculated)
@@ -32,6 +40,7 @@ describe Carbon::EmissionsCalculation do
       calculation.value.should == 'http://foo/bar'
     end
   end
+
   describe '#calculate!' do
     before(:each) do
       calculation.stub!(:fetch_calculation)
@@ -44,6 +53,13 @@ describe Carbon::EmissionsCalculation do
     it 'should set value' do
       calculation.calculate!
       calculation.value.should == 134.599
+    end
+  end
+
+  describe '#fields' do
+    it 'should not send fields that are not set' do
+      donut_factory.smokestack_size = 'big'
+      calculation.send(:fields).keys.should_not include(:oven_count)
     end
   end
 end

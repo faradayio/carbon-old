@@ -9,7 +9,8 @@ module Carbon
 
     include HTTParty
 
-    attr_accessor :options, :source, :value, :methodology_url
+    attr_accessor :options, :source
+    attr_reader :value, :methodology_url, :committees
 
     def initialize(options, source)
       self.options = options
@@ -29,6 +30,7 @@ module Carbon
       fetch_calculation
       @value = result['emission']
       @methodology_url = result['methodology']
+      @committees = result['committees']
     end
 
   private
@@ -38,7 +40,8 @@ module Carbon
 
     def fields
       fields_hash = options.characteristics.inject({}) do |hsh, characteristic|
-        hsh[characteristic.name.to_sym] = source.send(characteristic.field)
+        value = source.send(characteristic.field)
+        hsh[characteristic.name.to_sym] = value if value
         hsh
       end
       { :body => { options.emitter_type => fields_hash } }
