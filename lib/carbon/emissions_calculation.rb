@@ -42,7 +42,7 @@ module Carbon
       fields_hash = options.characteristics.inject({}) do |hsh, characteristic|
         if characteristic.respond_to?(:characteristics)
           sub_hash = fields(characteristic)
-          sub_hash[characteristic.name.to_sym].empty? ? hsh : sub_hash
+          sub_hash[characteristic.name.to_sym].empty? ? hsh : hsh.merge(sub_hash)
         else
           value = source.send(characteristic.field)
           hsh[characteristic.name.to_sym] = value if value

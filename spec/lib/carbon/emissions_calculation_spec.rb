@@ -4,7 +4,7 @@ class DonutFactory
   include Carbon::Emitter
 
   attr_accessor :smokestack_size, :oven_count, 
-    :mixer_size, :mixer_wattage
+    :mixer_size, :mixer_wattage, :employees
 
   emits_as :factory do
     provides :smokestack_size
@@ -13,6 +13,7 @@ class DonutFactory
       provides :size, :with => :mixer_size
       provides :wattage, :with => :mixer_wattage
     end
+    provides :personnel, :with => :employees
   end
 end
 
@@ -75,6 +76,18 @@ describe Carbon::EmissionsCalculation do
       fields = calculation.send(:fields, options)
       fields[:factory][:mixer][:size].should == 'large'
       fields[:factory][:mixer][:wattage].should == 1400
+    end
+    it 'should not overwrite other fields if sub-fields are given' do
+      donut_factory.oven_count = 22
+      donut_factory.mixer_size = 'large'
+      donut_factory.mixer_wattage = 1400
+      donut_factory.employees = 1024
+
+      fields = calculation.send(:fields, options)
+      fields[:factory][:oven_count].should == 22
+      fields[:factory][:mixer][:size].should == 'large'
+      fields[:factory][:mixer][:wattage].should == 1400
+      fields[:factory][:personnel].should == 1024
     end
   end
 end
