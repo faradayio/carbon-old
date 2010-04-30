@@ -1,0 +1,60 @@
+# Run me with:
+#
+#   $ watchr specs.watchr.rb
+
+# --------------------------------------------------
+# Convenience Methods
+# --------------------------------------------------
+def all_test_files
+  Dir['spec/**/*_spec.rb'] - ['spec/spec_helper.rb']
+end
+
+def run(cmd)
+  puts "\e[H\e[2J"  #clear console
+  puts(cmd)
+  system(cmd)
+end
+
+def run_all_tests
+  cmd = "spec spec"
+  run(cmd)
+end
+
+def run_spec(file_name)
+  return unless File.exist?(file_name)
+  file_text = File.read(file_name)
+  if file_text =~ /#\s*wip/
+    current_line = 2
+    exec_line = nil
+    file_text.each_line do |line|
+      if line =~ /#\s*wip/
+        exec_line ||= current_line
+      end
+      current_line += 1
+    end
+    run "spec #{file_name}:#{exec_line}"
+  else
+    run "spec #{file_name}"
+  end
+end
+
+# --------------------------------------------------
+# Watchr Rules
+# --------------------------------------------------
+watch('^spec/.+_spec.rb'  ) { |m| run_spec(m[0]) }
+watch('^app/(.+)/(.+)\.rb') { |m| run_spec("spec/#{m[1]}/#{m[2]}_spec.rb") }
+watch('^lib/(.*)\.rb'     ) { |m| run_spec("spec/lib/#{m[1]}_spec.rb") }
+watch('^spec/spec_helper\.rb') { run_all_tests }
+watch('actors_controller') { |m| run "spec spec/controllers" }
+
+# --------------------------------------------------
+# Signal Handling
+# --------------------------------------------------
+# Ctrl-\
+Signal.trap('QUIT') do
+  puts " --- Running all tests ---\n\n"
+  run_all_tests
+end
+
+# Ctrl-C
+Signal.trap('INT') { abort("\n") }
