@@ -3,11 +3,16 @@ require 'spec_helper'
 class DonutFactory
   include Carbon::Emitter
 
-  attr_accessor :smokestack_size, :oven_count
+  attr_accessor :smokestack_size, :oven_count, 
+    :mixer_size, :mixer_wattage
 
   emits_as :factory do
     provides :smokestack_size
     provides :oven_count
+    provides :mixer do
+      provides :size, :with => :mixer_size
+      provides :wattage, :with => :mixer_wattage
+    end
   end
 end
 
@@ -15,7 +20,7 @@ describe Carbon::EmissionsCalculation do
   let(:response) do
     { 'emission' => 134.599, 'methodology' => 'http://carbon.brighterplanet.com/something' }
   end
-  let(:options) { Carbon::Emitter::Options.new(:residence) }
+  let(:options) { DonutFactory.emitter_options }
   let(:donut_factory) { DonutFactory.new }
   let(:calculation) { Carbon::EmissionsCalculation.new(options, donut_factory) }
 
@@ -59,7 +64,17 @@ describe Carbon::EmissionsCalculation do
   describe '#fields' do
     it 'should not send fields that are not set' do
       donut_factory.smokestack_size = 'big'
-      calculation.send(:fields).keys.should_not include(:oven_count)
+      fields = calculation.send(:fields, options)
+      fields[:factory].keys.should_not include(:oven_count)
+      fields[:factory].keys.should include(:smokestack_size)
+    end
+    it 'should properly handle sub-fields' do
+      donut_factory.mixer_size = 'large'
+      donut_factory.mixer_wattage = 1400
+
+      fields = calculation.send(:fields, options)
+      fields[:factory][:mixer][:size].should == 'large'
+      fields[:factory][:mixer][:wattage].should == 1400
     end
   end
 end
