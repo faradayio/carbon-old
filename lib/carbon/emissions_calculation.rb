@@ -38,8 +38,8 @@ module Carbon
       @result
     end
 
-    def fields(options)
-      fields_hash = options.characteristics.inject({}) do |hsh, characteristic|
+    def fields(emitter_options = options)
+      fields_hash = emitter_options.characteristics.inject({}) do |hsh, characteristic|
         if characteristic.respond_to?(:characteristics)
           sub_hash = fields(characteristic)
           sub_hash[characteristic.name.to_sym].empty? ? hsh : hsh.merge(sub_hash)
@@ -49,14 +49,14 @@ module Carbon
           hsh
         end
       end
-      { options.name.to_sym => fields_hash }
+      { emitter_options.name.to_sym => fields_hash }
     end
 
     def fetch_calculation
       url = URI.join(Carbon.base_url, options.name.to_s.pluralize)
       response = self.class.post(url.to_s,
         :headers => { 'Accept' => 'application/json' },
-        :body => fields(options)
+        :body => fields
       )
 
       unless (200..399).include?(response.code)
