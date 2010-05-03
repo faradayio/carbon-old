@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
   s.name = 'carbon'
-  s.version = "0.0.9"
+  s.version = "0.0.10"
 
   s.required_rubygems_version = Gem::Requirement.new("> 1.3.1") if s.respond_to? :required_rubygems_version=
   s.authors = ["Derek Kastner"]
