@@ -64,10 +64,9 @@ describe Carbon::EmissionsCalculation do
 
   describe '#fields' do
     it 'should not send fields that are not set' do
-      donut_factory.smokestack_size = 'big'
       fields = calculation.send(:fields, options)
       fields[:factory].keys.should_not include(:oven_count)
-      fields[:factory].keys.should include(:smokestack_size)
+      fields[:factory].keys.should_not include(:mixer)
     end
     it 'should properly handle sub-fields' do
       donut_factory.mixer_size = 'large'
