@@ -33,13 +33,6 @@ module Carbon
     def errors
       data['errors']
     end
-    #--
-    # sabshere 7/17/10 FIXME this is currently stripped out of JSON responses and it probably shouldn't be
-    # The input parameters as they were understood by Brighter Planet.
-    # def input_params
-    #   data['input_params']
-    # end
-    #++
     # The URL of the methodology report indicating how this estimate was calculated.
     #   > my_car.emission.methodology
     #   => 'http://carbon.brighterplanet.com/automobiles.html?[...]'
@@ -52,11 +45,15 @@ module Carbon
     # For example:
     #   > my_car.emission.model
     #   => 'Ford Taurus'
-    #--
+    #
+    # sabshere 7/17/10
+    #
     # http://stackoverflow.com/questions/1095789/sub-classing-fixnum-in-ruby
+    #
     # note that we are not following wycat's revision http://stackoverflow.com/posts/1095993/revisions
+    #
     # if this is treated like a number, we don't want to respond with an EmissionEstimate
-    #++
+    #
     def method_missing(method_id, *args, &blk)
       if !block_given? and args.empty? and data.has_key? method_id.to_s
         data[method_id.to_s]

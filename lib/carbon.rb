@@ -86,14 +86,15 @@ module Carbon
   # For example:
   #   > my_car._carbon_request_body
   #   => 'fuel_efficiency=41&model=Ford+Taurus'
-  #--
+  #
   # We're **sending** using x-www-form-urlencoded because serializing objects into json is still troublesome. Why bother?
+  #
   # Here's what to_query does...
-  # ruby-1.8.7-head > { :make => { :name => 'Nissan' } }.to_param
-  #  => "make[name]=Nissan" 
-  # ruby-1.8.7-head > { :name => 'Nissan' }.to_query(:make)
-  #  => "make[name]=Nissan" 
-  #++
+  #
+  #   ruby-1.8.7-head > { :make => { :name => 'Nissan' } }.to_param
+  #    => "make[name]=Nissan" 
+  #   ruby-1.8.7-head > { :name => 'Nissan' }.to_query(:make)
+  #    => "make[name]=Nissan" 
   def _carbon_request_body
     self.class.carbon_base.translation_table.map do |characteristic, as|
       current_value = send(as)
