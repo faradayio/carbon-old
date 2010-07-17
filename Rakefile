@@ -10,8 +10,10 @@ begin
     gemspec.email = 'derek.kastner@brighterplanet.com'
     gemspec.homepage = 'http://carbon.brighterplanet.com/libraries'
     gemspec.authors = ['Derek Kastner', 'Seamus Abshere']
-    gemspec.add_dependency 'activesupport', '>=2.3.5'
-    gemspec.add_dependency 'httparty', '>=0.6.0'
+    gemspec.add_dependency 'activesupport', '>=3.0.0.beta2'
+    gemspec.add_dependency 'nap', '>=0.4'
+    gemspec.add_dependency 'andand', '>=1.3.1'
+    gemspec.add_dependency 'timeframe', '>=0.0.6'
 
     gemspec.add_development_dependency 'fakeweb', '>=1.2.8'
     # sabshere 7/16/10 if you're having trouble running specs, try "rspec spec" and/or "sudo gem install rspec --pre"
