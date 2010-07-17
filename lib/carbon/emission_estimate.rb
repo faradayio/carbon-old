@@ -1,9 +1,9 @@
-# Let's start off by saying that <tt>EmissionEstimate</tt> objects quack like numbers.
-#
-# So, you can just say <tt>puts my_car.emission</tt> and you'll get something like <tt>4308.29</tt>.
-#
-# At the same time, they contain all the data you get back from the emission estimate web service. For example, you could say <tt>puts my_donut_factor.emission.oven_count</tt> (see the tests) and you'd get back the oven count used in the calculation, if any.
 module Carbon
+  # Let's start off by saying that <tt>EmissionEstimate</tt> objects quack like numbers.
+  #
+  # So, you can just say <tt>puts my_car.emission</tt> and you'll get something like <tt>4308.29</tt>.
+  #
+  # At the same time, they contain all the data you get back from the emission estimate web service. For example, you could say <tt>puts my_donut_factor.emission.oven_count</tt> (see the tests) and you'd get back the oven count used in the calculation, if any.
   class EmissionEstimate
     attr_reader :data
     def initialize(data)
