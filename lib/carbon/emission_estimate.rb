@@ -10,7 +10,7 @@ module Carbon
       @data = data
       @number = data['emission'].to_f.freeze
     end
-    def ==(other) #:nodoc:
+    def ==(other) # :nodoc:
       other == @number
     end
     # Another way to access the emission value.

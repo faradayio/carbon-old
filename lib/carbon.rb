@@ -39,7 +39,7 @@ module Carbon
   mattr_accessor :key
   mattr_accessor :base_url
   self.base_url = DEFAULT_BASE_URL
-  def self.included(klass) #:nodoc:
+  def self.included(klass) # :nodoc:
     klass.cattr_accessor :carbon_base
     klass.extend ClassMethods
   end

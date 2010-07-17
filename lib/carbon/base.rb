@@ -16,7 +16,7 @@ module Carbon
     # :smokestack_size=>"smokestack_size",
     # :oven_count=>"oven_count",
     # [:mixer, :wattage]=>"mixer_wattage"}
-    def translation_table #:nodoc:
+    def translation_table # :nodoc:
       @translation_table ||= Hash.new
     end
     # Indicate that you will send in a piece of data about the emitter.
