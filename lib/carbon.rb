@@ -95,8 +95,8 @@ module Carbon
   #    => "make[name]=Nissan" 
   #   ruby-1.8.7-head > { :name => 'Nissan' }.to_query(:make)
   #    => "make[name]=Nissan" 
-  def _carbon_request_body
-    self.class.carbon_base.translation_table.map do |characteristic, as|
+  def _carbon_request_body(options = {})
+    body = self.class.carbon_base.translation_table.map do |characteristic, as|
       current_value = send(as)
       next if current_value.blank?
       if characteristic.is_a? Array #[:mixer, :size]
@@ -104,7 +104,11 @@ module Carbon
       else
         current_value.to_query characteristic
       end
-    end.join '&'
+    end
+    if options[:timeframe].is_a? Timeframe
+      body << "timeframe=#{options[:timeframe].to_param}"
+    end
+    body.join '&'
   end
   
   # Used internally, but you can look if you want.
@@ -114,11 +118,15 @@ module Carbon
   # For example:
   #   > my_car._carbon_response_body
   #   => "{ 'emission' => 410.29, 'emission_units' => 'kilograms', [...] }"
-  def _carbon_response_body
-    ::REST.post(_carbon_request_url, _carbon_request_body, ::Carbon::REQUEST_HEADERS).body
+  def _carbon_response_body(options = {})
+    ::REST.post(_carbon_request_url, _carbon_request_body(options), ::Carbon::REQUEST_HEADERS).body
   end
   
   # Returns an emission estimate.
+  # 
+  # === Options:
+  #
+  # [+:timeframe+]  pass an instance of Timeframe[http://github.com/rossmeissl/timeframe] to request an emission for a specific time period
   #
   # You can use it like a number...
   #   > my_car.emission + 5.1
@@ -126,7 +134,7 @@ module Carbon
   # Or you can get information about the response
   #   > my_car.emission.methodology
   #   => 'http://carbon.brighterplanet.com/automobiles.html?[...]'
-  def emission
-    @emission ||= ::Carbon::EmissionEstimate.new ::ActiveSupport::JSON.decode(_carbon_response_body)
+  def emission(options = {})
+    @emission ||= ::Carbon::EmissionEstimate.new ::ActiveSupport::JSON.decode(_carbon_response_body(options))
   end
 end

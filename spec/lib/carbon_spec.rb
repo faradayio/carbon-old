@@ -71,6 +71,12 @@ describe Carbon do
     d.emission.should == 1000
   end
   
+  it 'should accept timeframes' do
+    stub_http :rental_car
+    c = RentalCar.new
+    c._carbon_request_body(:timeframe => Timeframe.new(:year => 2009)).should =~ /timeframe=2009-01-01\/2010-01-01/
+  end
+  
   # an average car emits 6 tons of carbon in a year
   it 'should actually do a request!' do
     FakeWeb.clean_registry
