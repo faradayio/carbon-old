@@ -106,7 +106,10 @@ module Carbon
       end
     end
     if options[:timeframe].is_a? Timeframe
-      body << options.slice(:timeframe).to_query
+      body.push options.slice(:timeframe).to_query
+    end
+    if ::Carbon.key.present?
+      body.push({ :key => ::Carbon.key }.to_query)
     end
     body.compact.join '&'
   end
