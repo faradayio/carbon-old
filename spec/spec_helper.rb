@@ -5,14 +5,20 @@ begin
 rescue
 end
 
-carbon_path = File.expand_path(File.dirname(__FILE__) + '/../lib/')
-$LOAD_PATH.unshift(carbon_path) unless $LOAD_PATH.include?(carbon_path)
 require 'carbon'
 
-Dir.glob(File.expand_path(File.dirname(__FILE__) + '/lib/**/*_examples.rb')).each do |file|
-  require file
-end
-
-Dir.glob(File.expand_path(File.dirname(__FILE__) + '/support/**/*.rb')).each do |file|
-  require file
+require 'fakeweb'
+{
+  'automobiles' => {
+    'emission' => '134.599',
+    'emission_units' => 'kilograms',
+    'methodology' => 'http://carbon.brighterplanet.com/something'
+  },
+  'factories' => {
+    'emission' => 1000.0,
+    'emission_units' => 'kilograms',
+    'methodology' => 'http://carbon.brighterplanet.com/something'
+  }
+}.each do |k, v|
+  FakeWeb.register_uri :post, /#{k}/, :body => v.to_json
 end

@@ -111,7 +111,14 @@ module Carbon
     if ::Carbon.key.present?
       body.push({ :key => ::Carbon.key }.to_query)
     end
-    body.compact.join '&'
+    @_last_carbon_request_body = body.compact.join '&'
+  end
+
+  # Used internally for testing, but you can look if you want.
+  #
+  # Returns the last request body that was sent.
+  def _last_carbon_request_body
+    @_last_carbon_request_body
   end
   
   # Used internally, but you can look if you want.
