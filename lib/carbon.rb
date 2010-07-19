@@ -108,7 +108,7 @@ module Carbon
     if options[:timeframe].is_a? Timeframe
       body << options.slice(:timeframe).to_query
     end
-    body.join '&'
+    body.compact.join '&'
   end
   
   # Used internally, but you can look if you want.

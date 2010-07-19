@@ -77,6 +77,11 @@ describe Carbon do
     c._carbon_request_body(:timeframe => Timeframe.new(:year => 2009)).should =~ /timeframe=2009-01-01%2F2010-01-01/
   end
   
+  it 'should not generate post bodies with lots of empty params' do
+    c = RentalCar.new
+    c._carbon_request_body(:timeframe => Timeframe.new(:year => 2009)).should_not include('&&')    
+  end
+  
   # an average car emits 6 tons of carbon in a year
   it 'should actually do a request!' do
     FakeWeb.clean_registry
