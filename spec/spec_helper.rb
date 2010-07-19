@@ -20,5 +20,5 @@ require 'fakeweb'
     'methodology' => 'http://carbon.brighterplanet.com/something'
   }
 }.each do |k, v|
-  FakeWeb.register_uri :post, /#{k}/, :body => v.to_json
+  FakeWeb.register_uri :post, /http:\/\/carbon.brighterplanet.com\/#{k}/, :body => v.to_json
 end
