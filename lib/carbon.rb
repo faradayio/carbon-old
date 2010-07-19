@@ -106,7 +106,7 @@ module Carbon
       end
     end
     if options[:timeframe].is_a? Timeframe
-      body << "timeframe=#{options[:timeframe].to_param}"
+      body << options.slice(:timeframe).to_query
     end
     body.join '&'
   end
