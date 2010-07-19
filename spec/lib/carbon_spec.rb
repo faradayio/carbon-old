@@ -72,7 +72,6 @@ describe Carbon do
   end
   
   it 'should accept timeframes' do
-    stub_http :rental_car
     c = RentalCar.new
     c._carbon_request_body(:timeframe => Timeframe.new(:year => 2009)).should =~ /timeframe=2009-01-01%2F2010-01-01/
   end
