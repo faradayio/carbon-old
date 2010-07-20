@@ -5,34 +5,29 @@
 
 Gem::Specification.new do |s|
   s.name = %q{carbon}
-  s.version = "0.0.10"
+  s.version = "0.1.1"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Derek Kastner", "Seamus Abshere"]
-  s.date = %q{2010-07-16}
+  s.date = %q{2010-07-19}
   s.description = %q{Carbon allows you to easily calculate the carbon footprint of various activities. This is an API for the Brighter Planet Carbon Middleware service.}
   s.email = %q{derek.kastner@brighterplanet.com}
   s.extra_rdoc_files = [
-    "README.md"
+    "README.rdoc"
   ]
   s.files = [
-    "MIT-LICENSE.txt",
-     "README.md",
+    ".gitignore",
+     "MIT-LICENSE.txt",
+     "README.rdoc",
+     "Rakefile",
      "VERSION",
      "carbon.gemspec",
      "lib/carbon.rb",
-     "lib/carbon/emissions_calculation.rb",
-     "lib/carbon/emitter.rb",
-     "lib/carbon/emitter/characteristic.rb",
-     "lib/carbon/emitter/class_methods.rb",
-     "lib/carbon/emitter/options.rb",
-     "spec/lib/carbon/emissions_calculation_spec.rb",
-     "spec/lib/carbon/emitter/options_spec.rb",
-     "spec/lib/carbon/emitter_spec.rb",
+     "lib/carbon/base.rb",
+     "lib/carbon/emission_estimate.rb",
      "spec/lib/carbon_spec.rb",
      "spec/spec_helper.rb",
-     "spec/specwatchr",
-     "spec/support/http.rb"
+     "spec/specwatchr"
   ]
   s.homepage = %q{http://carbon.brighterplanet.com/libraries}
   s.rdoc_options = ["--charset=UTF-8"]
@@ -40,12 +35,8 @@ Gem::Specification.new do |s|
   s.rubygems_version = %q{1.3.7}
   s.summary = %q{A gem for calculating carbon footprints using Brighter Planet's Carbon Middleware service}
   s.test_files = [
-    "spec/lib/carbon/emissions_calculation_spec.rb",
-     "spec/lib/carbon/emitter/options_spec.rb",
-     "spec/lib/carbon/emitter_spec.rb",
-     "spec/lib/carbon_spec.rb",
-     "spec/spec_helper.rb",
-     "spec/support/http.rb"
+    "spec/lib/carbon_spec.rb",
+     "spec/spec_helper.rb"
   ]
 
   if s.respond_to? :specification_version then
@@ -53,19 +44,22 @@ Gem::Specification.new do |s|
     s.specification_version = 3
 
     if Gem::Version.new(Gem::VERSION) >= Gem::Version.new('1.2.0') then
-      s.add_runtime_dependency(%q<activesupport>, [">= 2.3.5"])
-      s.add_runtime_dependency(%q<httparty>, [">= 0.6.0"])
+      s.add_runtime_dependency(%q<activesupport>, [">= 3.0.0.beta2"])
+      s.add_runtime_dependency(%q<nap>, [">= 0.4"])
+      s.add_runtime_dependency(%q<timeframe>, [">= 0.0.6"])
       s.add_development_dependency(%q<fakeweb>, [">= 1.2.8"])
       s.add_development_dependency(%q<rspec>, [">= 2.0.0.beta.17"])
     else
-      s.add_dependency(%q<activesupport>, [">= 2.3.5"])
-      s.add_dependency(%q<httparty>, [">= 0.6.0"])
+      s.add_dependency(%q<activesupport>, [">= 3.0.0.beta2"])
+      s.add_dependency(%q<nap>, [">= 0.4"])
+      s.add_dependency(%q<timeframe>, [">= 0.0.6"])
       s.add_dependency(%q<fakeweb>, [">= 1.2.8"])
       s.add_dependency(%q<rspec>, [">= 2.0.0.beta.17"])
     end
   else
-    s.add_dependency(%q<activesupport>, [">= 2.3.5"])
-    s.add_dependency(%q<httparty>, [">= 0.6.0"])
+    s.add_dependency(%q<activesupport>, [">= 3.0.0.beta2"])
+    s.add_dependency(%q<nap>, [">= 0.4"])
+    s.add_dependency(%q<timeframe>, [">= 0.0.6"])
     s.add_dependency(%q<fakeweb>, [">= 1.2.8"])
     s.add_dependency(%q<rspec>, [">= 2.0.0.beta.17"])
   end
