@@ -30,13 +30,10 @@ module Carbon
     # For example:
     #
     #    emit_as :automobile do
-    #      provide :make                                    # "I will send the value of #make as 'make=X'"
-    #      provide :model, :as => :my_funny_name_for_model  # "I will send the value of #my_funny_name_for_model as 'model=X'"
-    #      provide :name,  :of => :make                     # "I will send the value of #make_name as make[name]=X" (note: getter method name was guessed)
+    #                                                       # Official Brighter Planet characteristic name       Your name for it
+    #      provide :model, :as => :carline_class            # model                                              carline_class
+    #      provide :name,  :of => :make, :as => :mfr_name   # make[name]                                         mfr_name
     #    end
-    #
-    # sabshere 7/17/10 - is this a good place to allow a "units" option? this would probably just be for enforcement, i don't think we would accept non-standard units
-    #
     def provide(attr_name, options = {})
       options = options.symbolize_keys
       characteristic = if options.has_key? :of

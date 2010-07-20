@@ -1,9 +1,11 @@
 module Carbon
   # Let's start off by saying that <tt>EmissionEstimate</tt> objects quack like numbers.
   #
-  # So, you can just say <tt>puts my_car.emission</tt> and you'll get something like <tt>4308.29</tt>.
+  # So, you can just say <tt>my_car.emission</tt> and you'll get something like <tt>4308.29</tt>.
   #
   # At the same time, they contain all the data you get back from the emission estimate web service. For example, you could say <tt>puts my_donut_factor.emission.oven_count</tt> (see the tests) and you'd get back the oven count used in the calculation, if any.
+  # 
+  # Note: <b>you need to take care of storing emission estimates to local variables!</b> The gem doesn't cache these for you. Every time you call <tt>emission</tt> it will send another query to the server!
   class EmissionEstimate
     attr_reader :data
     def initialize(data)
@@ -45,15 +47,6 @@ module Carbon
     # For example:
     #   > my_car.emission.model
     #   => 'Ford Taurus'
-    #
-    # sabshere 7/17/10
-    #
-    # http://stackoverflow.com/questions/1095789/sub-classing-fixnum-in-ruby
-    #
-    # note that we are not following wycat's revision http://stackoverflow.com/posts/1095993/revisions
-    #
-    # if this is treated like a number, we don't want to respond with an EmissionEstimate
-    #
     def method_missing(method_id, *args, &blk)
       if !block_given? and args.empty? and data.has_key? method_id.to_s
         data[method_id.to_s]

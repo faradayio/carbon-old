@@ -2,8 +2,9 @@ require 'spec_helper'
 
 class RentalCar
   include Carbon
-  attr_accessor :model, :model_year, :fuel_economy
+  attr_accessor :make, :model, :model_year, :fuel_economy
   emit_as :automobile do
+    provide :make
     provide :model
     provide :model_year
     provide :fuel_efficiency, :as => :fuel_economy
@@ -25,7 +26,6 @@ end
 describe Carbon do
   before(:each) do
     Carbon.key = 'valid'
-    Carbon.base_url = Carbon::DEFAULT_BASE_URL
   end
   
   it 'should be simple to use' do
@@ -33,11 +33,16 @@ describe Carbon do
     c.model = 'Acura'
     c.model_year = 2003
     c.fuel_economy = 32
-    c.emission.should == 134.599
-    c.emission.emission_units.should == 'kilograms'
+    e = c.emission
+    e.should == 134.599
+    e.emission_units.should == 'kilograms'
   end
   
   describe 'synchronous (realtime) requests' do
+    before(:each) do
+      Carbon.mode = :realtime
+    end
+    
     it 'should handle complex attributes like mixer[size]' do
       d = DonutFactory.new
       d.mixer_size = 20
@@ -54,17 +59,42 @@ describe Carbon do
       d = DonutFactory.new
       d._carbon_request_body.should =~ /key=valid/
     end
+    
+    it 'should override defaults' do
+      d = DonutFactory.new
+      d.emission(:key => 'ADifferentOne')
+      d.last_carbon_request.body.should =~ /key=ADifferentOne/
+    end
   
     it 'should accept timeframes' do
       c = RentalCar.new
       c.emission :timeframe => Timeframe.new(:year => 2009)
-      c._last_carbon_request_body.should =~ /timeframe=2009-01-01%2F2010-01-01/
+      c.last_carbon_request.body.should =~ /timeframe=2009-01-01%2F2010-01-01/
     end
   
     it 'should not generate post bodies with lots of empty params' do
       c = RentalCar.new
       c.emission :timeframe => Timeframe.new(:year => 2009)
-      c._last_carbon_request_body.should_not include('&&')
+      c.last_carbon_request.body.should_not include('&&')
+    end
+  end
+  
+  describe 'asynchronous (queued) requests' do
+    before(:each) do
+      Carbon.mode = :async
+    end
+    
+    it 'should raise an exception if no callback is provided' do
+      c = RentalCar.new
+      lambda {
+        c.emission :timeframe => Timeframe.new(:year => 2009)
+      }.should raise_error(Carbon::BlankCallback)
+    end
+    
+    it 'should post a message to SQS' do
+      c = RentalCar.new
+      c._carbon_request_url.should =~ /queue.amazonaws.com/
+      c.emission :timeframe => Timeframe.new(:year => 2009), :callback => 'http://example.com/callback?id=999'
     end
   end
 end
