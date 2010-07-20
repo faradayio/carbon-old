@@ -62,10 +62,10 @@ module Carbon
       :key => key,
     }
   end
-  
-   # You will probably never access this module directly. Instead, you'll use it through the DSL.
-   #
-   # It's mixed into any class that includes <tt>Carbon</tt>.
+
+  # You will probably never access this module directly. Instead, you'll use it through the DSL.
+  #
+  # It's mixed into any class that includes <tt>Carbon</tt>.
   module ClassMethods
     # Indicate that this class "emits as" an <tt>:automobile</tt>, <tt>:flight</tt>, or another of the Brighter Planet emitter classes.
     #
