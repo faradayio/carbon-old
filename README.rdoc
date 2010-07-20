@@ -47,6 +47,30 @@ When you want to calculate emissions, simply call <tt>RentalCar</tt>#<tt>emissio
 
 Read the {carbon gem RDoc}[http://rdoc.info/projects/brighterplanet/carbon] for more!
 
+== Exceptions to watch out for
+
+Since this gem connects to a web service, you need to be ready for network problems and latency. For example:
+
+    begin
+      my_emission = my_car.emission
+    rescue ::SocketError, ::Timeout::Error, ::Errno::ETIMEDOUT, ::Errno::ENETUNREACH, ::Errno::ECONNRESET, ::Errno::ECONNREFUSED
+      # These are general network errors raised by Net::HTTP.
+      # Your internet connection might be down, or our servers might be down.
+    rescue ::Carbon::RateLimited
+      # Realtime mode only.
+      # In order to prevent denial-of-service attacks, our servers rate limit requests.
+      # The gem will try up to three times to get an answer back from the server, waiting slightly longer each time.
+      # If you still get this exception, please contact us at staff@brighterplanet.com and we'll lift your rate.
+    rescue ::Carbon::RealtimeEstimateFailed
+      # Realtime mode only.
+      # Our server returned a 4XX or 5XX error.
+      # Please contact us at staff@brighterplanet.com if you get these more than a couple times.
+    rescue ::Carbon::QueueingFailed
+      # Async mode only.
+      # The gem connects directly to Amazon SQS in order to provide maximum throughput. If that service returns anything other than success, you get this exception.
+      # Please contact us at staff@brighterplanet.com if you see too many of these.
+    end
+
 == A note on API keys
 
 You should get an API key from http://keys.brighterplanet.com and set it globally:

@@ -170,7 +170,19 @@ module Carbon
   end
 
   def _realtime_emission(options = {}) # :nodoc:
-    response = _carbon_response options
+    attempts = 0
+    begin
+      response = _carbon_response options
+      raise ::Carbon::RateLimited if response.status_code == 403 and response.body =~ /Rate Limit/i
+    rescue ::Carbon::RateLimited
+      if attempts < 4
+        attempts += 1
+        sleep 0.2 * attempts
+        retry
+      else
+        raise $!, "Rate limited #{attempts} time(s) in a row"
+      end
+    end
     raise ::Carbon::RealtimeEstimateFailed unless response.success?
     ::Carbon::EmissionEstimate.new ::ActiveSupport::JSON.decode(response.body)
   end
@@ -206,6 +218,8 @@ module Carbon
   # Returns an emission estimate.
   #
   # Note: <b>You need to take care of storing the return value to a local variable!</b> Every call to <tt>emission</tt> runs a query.
+  #
+  # Note also: please see the README about exceptions that you should watch out for.
   # 
   # You can use it like a number...
   #   > my_car.emission + 5.1
