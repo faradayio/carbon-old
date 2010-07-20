@@ -132,7 +132,7 @@ module Carbon
 
   def _async_carbon_request_body(options) # :nodoc:
     params = _carbon_request_params options
-    params[:emitter] = self.class.carbon_base.emitter_common_name.pluralize
+    params[:emitter] = self.class.carbon_base.emitter_common_name
     raise ::Carbon::BlankCallback unless options[:callback].present?
     params[:callback] = options[:callback]
     params[:callback_content_type] = options[:callback_content_type] || 'application/json'
