@@ -80,17 +80,6 @@ describe Carbon do
   end
   
   describe 'asynchronous (queued) requests' do
-    before(:each) do
-      Carbon.mode = :async
-    end
-    
-    it 'should raise an exception if no callback is provided' do
-      c = RentalCar.new
-      lambda {
-        c.emission :timeframe => Timeframe.new(:year => 2009)
-      }.should raise_error(Carbon::BlankCallback)
-    end
-    
     it 'should post a message to SQS' do
       c = RentalCar.new
       c._carbon_request_url.should =~ /queue.amazonaws.com/
