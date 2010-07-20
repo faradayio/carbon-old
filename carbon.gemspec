@@ -5,11 +5,11 @@
 
 Gem::Specification.new do |s|
   s.name = %q{carbon}
-  s.version = "0.1.2"
+  s.version = "0.1.3"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Derek Kastner", "Seamus Abshere"]
-  s.date = %q{2010-07-19}
+  s.date = %q{2010-07-20}
   s.description = %q{Carbon allows you to easily calculate the carbon footprint of various activities. This is an API for the Brighter Planet Carbon Middleware service.}
   s.email = %q{derek.kastner@brighterplanet.com}
   s.extra_rdoc_files = [
