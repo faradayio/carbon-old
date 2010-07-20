@@ -6,17 +6,19 @@ By querying the web service, it can estimate the carbon emissions of many real-l
 
 == Quick start
 
-First get the gem!
+*You'll need a Brighter Planet API key. See the "API keys" section below for details.*
+
+First get the gem:
 
     $ gem install carbon
 
-Carbon works by extending any Ruby class you're using to represent an emission source. For instance, let's say you have a plain Ruby class <tt>RentalCar</tt> that represents a rental car on your lot: (<tt>ActiveRecord</tt> models work fine too!)
+Carbon works by extending any Ruby class you're using to represent an emission source. For instance, let's say you have a Ruby class <tt>RentalCar</tt> that represents a rental car on your lot. (Note that ActiveRecord models work great with carbon.)
 
     class RentalCar
       attr_accessor :year, :make, :model, :fuel_efficiency, :daily_distance_average, :purchase_date, :retirement_date
     end
 
-In order to calculate carbon emissions, we need to map the car's relevant attributes to correctly-named characteristics that the {web service}[http://carbon.brighterplanet.com] will recognize:
+In order to calculate carbon emissions, we need to map the car's relevant attributes to characteristics that the {web service}[http://carbon.brighterplanet.com] will recognize. In this case, a review of the available characteristics for Automobile[http://carbon.brighterplanet.com/automobiles/options] yields the following map:
 
     class RentalCar
       include Carbon
@@ -32,7 +34,7 @@ In order to calculate carbon emissions, we need to map the car's relevant attrib
       end
     end
 
-When you want to calculate emissions, simply call <tt>RentalCar</tt>#<tt>emission</tt>... (and <b>store the result to a local variable!</b> Otherwise it will make a web service call every time.)
+When you want to calculate emissions, simply call <tt>RentalCar</tt>#<tt>emission</tt>. Memoize this method on your class or store the result; <tt>#emision</tt> makes a web service call every time it is invoked.
 
     > my_car = RentalCar.new([...])
     => #<RentalCar [...]>
@@ -44,10 +46,20 @@ When you want to calculate emissions, simply call <tt>RentalCar</tt>#<tt>emissio
     => "kilograms"
     > my_emission.methodology
     => "http://carbon.brighterplanet.com/automobiles.html?[...]"
+    
+=== Asynchronous queries
 
-Read the {carbon gem RDoc}[http://rdoc.info/projects/brighterplanet/carbon] for more!
+To request an emission estimate asynchronously, simply pass an URL as the +:callback+ option to +#emission+:
 
-== Exceptions to watch out for
+    > RentalCar.new.emission :callback => http://example.com/my/callback/handler
+
+A good way to test this is to set up a {PostBin}[http://postbin.org]
+
+== Documentation
+
+Read the {carbon gem RDoc}[http://rdoc.info/projects/brighterplanet/carbon] for more.
+
+== Exceptions
 
 Since this gem connects to a web service, you need to be ready for network problems and latency. For example:
 
@@ -71,34 +83,13 @@ Since this gem connects to a web service, you need to be ready for network probl
       # Please contact us at staff@brighterplanet.com if you see too many of these.
     end
 
-== A note on API keys
+== API keys
 
 You should get an API key from http://keys.brighterplanet.com and set it globally:
 
     Carbon.key = '12903019230128310293'
 
 Now all of your queries will use that key.
-
-== A note on modes
-
-When you send in a query, you have two options for how you want the result back:
-
-* realtime - you get the answer back immediately. More expensive.
-* async - the answer is POSTed back to a URL that you specify. You must have a server waiting for it! Cheaper.
-
-The default is realtime:
-
-    > my_emission = RentalCar.new.emission
-    => #<Carbon::EmissionEstimate [...]>
-
-A good way to test the "async" mode is to set up a {PostBin}[http://postbin.org]
-
-    > RentalCar.new.emission :mode => :async, :callback => 'http://postbin.org/1dj0145'
-    => true # useless, but go check out http://postbin.org/1dj0145
-
-You can set the mode globally with
-
-    Carbon.mode = :async
 
 == Copyright
 
