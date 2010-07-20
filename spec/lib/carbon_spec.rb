@@ -94,7 +94,7 @@ describe Carbon do
     it 'should post a message to SQS' do
       c = RentalCar.new
       c._carbon_request_url.should =~ /queue.amazonaws.com/
-      c.emission :timeframe => Timeframe.new(:year => 2009), :callback => 'http://www.postbin.org/1dj0145'
+      c.emission :timeframe => Timeframe.new(:year => 2009), :callback => 'http://www.postbin.org/1dj0146'
     end
   end
 end
