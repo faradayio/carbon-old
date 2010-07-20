@@ -56,11 +56,10 @@ module Carbon
 
   # The api key obtained from http://keys.brighterplanet.com
   mattr_accessor :key
-  
-  def self.default_options # :nodoc:
-    {
-      :key => key,
-    }
+    
+  def self.prepare_options(options) # :nodoc:
+    options[:key] ||= key
+    options[:mode] ||= options.has_key?(:callback) ? :async : :realtime
   end
 
   # You will probably never access this module directly. Instead, you'll use it through the DSL.
@@ -91,7 +90,7 @@ module Carbon
   #   > my_car._carbon_request_url
   #   => 'http://carbon.brighterplanet.com/automobiles.json'
   def _carbon_request_url(options = {})
-    options.reverse_merge! ::Carbon.default_options
+    ::Carbon.prepare_options options
     send "_#{options[:mode]}_carbon_request_url"
   end
   
@@ -111,7 +110,7 @@ module Carbon
   #   > my_car._carbon_request_body
   #   => 'fuel_efficiency=41&model=Ford+Taurus'
   def _carbon_request_body(options = {})
-    options.reverse_merge! ::Carbon.default_options
+    ::Carbon.prepare_options options
     send "_#{options[:mode]}_carbon_request_body", options
   end
 
@@ -136,7 +135,7 @@ module Carbon
   #
   # Returns the params hash that will be send to the emission estimate server.
   def _carbon_request_params(options)
-    options.reverse_merge! ::Carbon.default_options
+    ::Carbon.prepare_options options
     params = self.class.carbon_base.translation_table.inject(Hash.new) do |memo, translation|
       characteristic, as = translation
       current_value = send as
@@ -216,13 +215,11 @@ module Carbon
   # === Options:
   #
   # * <tt>:timeframe</tt> (optional) pass an instance of Timeframe[http://github.com/rossmeissl/timeframe] to request an emission for a specific time period.
-  # * <tt>:callback</tt> (required in <tt>:async</tt> mode, ignored otherwise) where to POST the result when it's been calculated. You need a server waiting for it!
-  # * <tt>:callback_content_type</tt> (optional in <tt>:async</tt> mode, ignored otherwise) pass a MIME type like 'text/yaml' so we know how to format the result when we send it to your waiting server. Defaults to 'application/json'.
-  # * <tt>:mode</tt> (optional, overrides general <tt>Carbon</tt>.<tt>mode</tt> setting just for this query) If some of your queries are realtime and some are asynchronous, you can override the setting here.
+  # * <tt>:callback</tt> (optional) where to POST the result when it's been calculated. You need a server waiting for it!
+  # * <tt>:callback_content_type</tt> (optional if <tt>:callback</tt> is specified, ignored otherwise) pass a MIME type like 'text/yaml' so we know how to format the result when we send it to your waiting server. Defaults to 'application/json'.
   # * <tt>:key</tt> (optional, overrides general <tt>Carbon</tt>.<tt>key</tt> setting just for this query) If you want to use different API keys for different queries.
   def emission(options = {})
-    options.reverse_merge! ::Carbon.default_options
-    options[:mode] = options[:callback] ? :async : :realtime
+    ::Carbon.prepare_options options
     send "_#{options[:mode]}_emission", options
   end
 end
