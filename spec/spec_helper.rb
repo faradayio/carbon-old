@@ -5,6 +5,8 @@ begin
 rescue
 end
 
+require 'active_support/json/encoding'
+
 require 'carbon'
 
 require 'fakeweb'

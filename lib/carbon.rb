@@ -2,6 +2,7 @@ require 'uri'
 require 'blockenspiel'
 require 'rest' # provided by nap gem
 require 'timeframe'
+require 'active_support/version'
 %w{
   active_support/core_ext/module/attribute_accessors
   active_support/core_ext/class/attribute_accessors
@@ -13,7 +14,7 @@ require 'timeframe'
   active_support/json/decoding
 }.each do |active_support_3_requirement|
   require active_support_3_requirement
-end
+end if ActiveSupport::VERSION::MAJOR == 3
 require 'carbon/base'
 require 'carbon/emission_estimate'
 
