@@ -39,25 +39,21 @@ describe Carbon do
   end
   
   describe 'synchronous (realtime) requests' do
-    before(:each) do
-      Carbon.mode = :realtime
-    end
-    
     it 'should handle complex attributes like mixer[size]' do
       d = DonutFactory.new
       d.mixer_size = 20
-      d._carbon_request_body.should =~ /mixer\[size\]=20/
+      d._carbon_request_body(:mode => :realtime).should =~ /mixer\[size\]=20/
     end
   
     it 'should not send attributes that are blank' do
       d = DonutFactory.new
       d.mixer_size = 20
-      d._carbon_request_body.should_not =~ /oven_count/
+      d._carbon_request_body(:mode => :realtime).should_not =~ /oven_count/
     end
   
     it 'should send the key' do
       d = DonutFactory.new
-      d._carbon_request_body.should =~ /key=valid/
+      d._carbon_request_body(:mode => :realtime).should =~ /key=valid/
     end
     
     it 'should override defaults' do
@@ -82,7 +78,7 @@ describe Carbon do
   describe 'asynchronous (queued) requests' do
     it 'should post a message to SQS' do
       c = RentalCar.new
-      c._carbon_request_url.should =~ /queue.amazonaws.com/
+      c._carbon_request_url(:mode => :async).should =~ /queue.amazonaws.com/
       c.emission :timeframe => Timeframe.new(:year => 2009), :callback => 'http://www.postbin.org/1dj0146'
     end
   end

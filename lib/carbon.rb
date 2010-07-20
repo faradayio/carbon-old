@@ -42,12 +42,9 @@ module Carbon
     klass.extend ClassMethods
   end
   
-  MODES = [ :realtime, :async ]
   REALTIME_URL = 'http://carbon.brighterplanet.com'
   ASYNC_URL = 'https://queue.amazonaws.com/121562143717/cm1_production_incoming'
   
-  class UnrecognizedMode < ArgumentError # :nodoc:
-  end
   class BlankCallback < ArgumentError # :nodoc:
   end
   class RealtimeEstimateFailed < RuntimeError # :nodoc:
@@ -59,24 +56,10 @@ module Carbon
 
   # The api key obtained from http://keys.brighterplanet.com
   mattr_accessor :key
-
-  mattr_accessor :_mode
-  # Return the current mode. Defaults to <tt>:realtime</tt>.
-  def self.mode
-    _mode || :realtime
-  end
-  # Set the current mode.
-  # * Realtime mode (<tt>:realtime</tt>) means you get the answer back immediately.
-  # * Async mode (<tt>:async</tt>) means the answer will be POSTed back to you at a URL you specify. You must have a server waiting to receive it!
-  def self.mode=(str)
-    self._mode = str.to_sym
-    raise UnrecognizedMode unless MODES.include? mode
-  end
   
   def self.default_options # :nodoc:
     {
       :key => key,
-      :mode => mode
     }
   end
   
@@ -239,6 +222,7 @@ module Carbon
   # * <tt>:key</tt> (optional, overrides general <tt>Carbon</tt>.<tt>key</tt> setting just for this query) If you want to use different API keys for different queries.
   def emission(options = {})
     options.reverse_merge! ::Carbon.default_options
+    options[:mode] = options[:callback] ? :async : :realtime
     send "_#{options[:mode]}_emission", options
   end
 end
