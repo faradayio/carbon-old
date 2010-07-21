@@ -100,7 +100,7 @@ describe Carbon do
     it 'send complex params' do
       d = DonutFactory.new
       d.mixer.upc = 123
-      d.emission.request.body.should =~ /mixer\[upc\]=123/
+      d.emission.request.body.should include({:mixer => { :upc => 123 }}.to_query)
     end
   
     it 'should not send attributes that are blank' do
@@ -127,20 +127,21 @@ describe Carbon do
       c = RentalCar.new
       t = Timeframe.new(:year => 2009)
       c.emission.timeframe = t
-      c.emission.timeframe.should == t
+      c.emission.request.body.should include(t.to_query(:timeframe))
     end
     
     it 'should accept timeframes inline' do
       c = RentalCar.new
       t = Timeframe.new(:year => 2009)
       c.emission(:timeframe => t)
-      c.emission.timeframe.should == t
+      c.emission.request.body.should include(t.to_query(:timeframe))
     end
   
     it 'should not generate post bodies with lots of empty params' do
       c = RentalCar.new
       c.emission :timeframe => Timeframe.new(:year => 2009)
       c.emission.request.body.should_not include('&&')
+      c.emission.request.body.should_not =~ /=[^a-z0-9]/i
     end
   end
   
