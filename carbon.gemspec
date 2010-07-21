@@ -5,7 +5,7 @@
 
 Gem::Specification.new do |s|
   s.name = %q{carbon}
-  s.version = "0.1.5"
+  s.version = "0.1.6"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Derek Kastner", "Seamus Abshere"]
@@ -25,6 +25,8 @@ Gem::Specification.new do |s|
      "lib/carbon.rb",
      "lib/carbon/base.rb",
      "lib/carbon/emission_estimate.rb",
+     "lib/carbon/emission_estimate/request.rb",
+     "lib/carbon/emission_estimate/response.rb",
      "spec/lib/carbon_spec.rb",
      "spec/spec_helper.rb",
      "spec/specwatchr"
