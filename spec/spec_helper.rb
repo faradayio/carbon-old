@@ -14,7 +14,8 @@ require 'fakeweb'
   [ /http:\/\/carbon.brighterplanet.com\/automobiles/, {
     'emission' => '134.599',
     'emission_units' => 'kilograms',
-    'methodology' => 'http://carbon.brighterplanet.com/something'
+    'methodology' => 'http://carbon.brighterplanet.com/something',
+    'active_subtimeframe' => Timeframe.new(:year => 2008)
   }.to_json],
   [ /http:\/\/carbon.brighterplanet.com\/factories/, {
     'emission' => 1000.0,

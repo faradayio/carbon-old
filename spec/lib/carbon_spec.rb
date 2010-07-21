@@ -156,6 +156,11 @@ describe Carbon do
       c.emission(:timeframe => t)
       c.emission.request.body.should include(t.to_query(:timeframe))
     end
+    
+    it 'should read active subtimeframes back from calculations' do
+      c = RentalCar.new
+      c.emission.active_subtimeframe.should == Timeframe.new(:year => 2008)
+    end
   
     it 'should not generate post bodies with lots of empty params' do
       c = RentalCar.new

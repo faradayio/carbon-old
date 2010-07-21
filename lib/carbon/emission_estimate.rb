@@ -76,6 +76,10 @@ module Carbon
     def key
       @key || ::Carbon.key
     end
+    # The timeframe being looked at in the emission calculation.
+    def active_subtimeframe
+      ::Timeframe.interval(response.data['active_subtimeframe']) if response.data.has_key? 'active_subtimeframe'
+    end
     # Another way to access the emission value.
     # Useful if you don't like treating <tt>EmissionEstimate</tt> objects like <tt>Numeric</tt> objects (even though they do quack like numbers...)
     def emission_value
