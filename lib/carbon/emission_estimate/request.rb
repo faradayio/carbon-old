@@ -27,20 +27,27 @@ module Carbon
       # Returns the params hash that will be send to the emission estimate server.
       def params
         params = parent.emitter.class.carbon_base.translation_table.inject({}) do |memo, translation|
-          characteristic, as = translation
-          current_value = parent.emitter.send as
+          characteristic, key = translation
+          if characteristic.is_a? ::Array
+            current_value = parent.emitter.send characteristic[0]
+            as = characteristic[1]
+          else
+            current_value = parent.emitter.send characteristic
+            as = characteristic
+          end
+          current_value = current_value.to_param
           if current_value.present?
-            if characteristic.is_a? Array                                 # [:mixer, :size]
-              memo[characteristic[0]] ||= {}                              # { :mixer => Hash.new }
-              memo[characteristic[0]][characteristic[1]] = current_value  # { :mixer => { :size => 'foo' }}
-            else                                                          # :oven_count
-              memo[characteristic] = current_value                        # { :oven_count => 'bar' }
+            if key
+              memo[as] ||= {}
+              memo[as][key] = current_value
+            else
+              memo[as] = current_value
             end
           end
           memo
         end
-        params[:timeframe] = parent.timeframe
-        params[:key] = parent.key
+        params[:timeframe] = parent.timeframe if parent.timeframe
+        params[:key] = parent.key if parent.key
         params
       end
       def realtime_url # :nodoc:

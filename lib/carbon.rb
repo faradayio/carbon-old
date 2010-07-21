@@ -9,7 +9,6 @@ require 'active_support/version'
   active_support/core_ext/hash/keys
   active_support/core_ext/hash/reverse_merge
   active_support/core_ext/object/to_query
-  active_support/core_ext/array/wrap
   active_support/inflector/inflections
   active_support/json/decoding
 }.each do |active_support_3_requirement|
@@ -78,9 +77,7 @@ module Carbon
 
   # Returns an emission estimate.
   #
-  # Note: <b>You need to take care of storing the return value to a local variable!</b> Every call to <tt>emission</tt> runs a query.
-  #
-  # Note also: please see the README about exceptions that you should watch out for.
+  # Note: please see the README about <b>exceptions that you should watch out for</b>.
   # 
   # You can use it like a number...
   #   > my_car.emission + 5.1

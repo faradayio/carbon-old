@@ -6,35 +6,41 @@ By querying the web service, it can estimate the carbon emissions of many real-l
 
 == Quick start
 
-*You'll need a Brighter Planet API key. See the "API keys" section below for details.*
+<b>You'll need a Brighter Planet API key. See the "API keys" section below for details.</b>
 
 First get the gem:
 
     $ gem install carbon
 
-Carbon works by extending any Ruby class you're using to represent an emission source. For instance, let's say you have a Ruby class <tt>RentalCar</tt> that represents a rental car on your lot. (Note that ActiveRecord models work great with carbon.)
+Carbon works by extending any Ruby class you're using to represent an emission source. For instance, let's say you have a Ruby class <tt>RentalCar</tt> that represents a rental car on your lot. (Note that ActiveRecord models work great with this gem.)
 
     class RentalCar
-      attr_accessor :year, :make, :model, :fuel_efficiency, :daily_distance_average, :purchase_date, :retirement_date
+      attr_accessor :model, :model_year, :fuel_economy
+      class Make
+        attr_accessor :name
+        def to_param
+          name
+        end
+      end
+      def make
+        @make ||= Make.new
+      end
     end
 
 In order to calculate carbon emissions, we need to map the car's relevant attributes to characteristics that the {web service}[http://carbon.brighterplanet.com] will recognize. In this case, a review of the available characteristics for Automobile[http://carbon.brighterplanet.com/automobiles/options] yields the following map:
 
     class RentalCar
+      # [...]
       include Carbon
-      [...]
       emit_as :automobile do
-        provide :model_year, :as => :year # you say tomayto, I say tomahto
         provide :make
         provide :model
-        provide :fuel_efficiency
-        provide :daily_distance_estimate, :as => daily_distance_average
-        provide :acquisition, :as => :purchase_date
-        provide :retirement, :as => :retirement_date
+        provide :model_year
+        provide :fuel_economy, :as => :fuel_efficiency
       end
     end
 
-When you want to calculate emissions, simply call <tt>RentalCar</tt>#<tt>emission</tt>. Memoize this method on your class or store the result; <tt>#emision</tt> makes a web service call every time it is invoked.
+When you want to calculate emissions, simply call <tt>RentalCar#emission</tt>.
 
     > my_car = RentalCar.new([...])
     => #<RentalCar [...]>
@@ -49,7 +55,7 @@ When you want to calculate emissions, simply call <tt>RentalCar</tt>#<tt>emissio
     
 === Asynchronous queries
 
-To request an emission estimate asynchronously, simply pass an URL as the +:callback+ option to +#emission+:
+To request an emission estimate asynchronously, simply pass an URL as the <tt>:callback</tt> option to <tt>#emission</tt>:
 
     > RentalCar.new.emission :callback => http://example.com/my/callback/handler
 

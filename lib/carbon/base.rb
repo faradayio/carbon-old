@@ -21,30 +21,34 @@ module Carbon
     end
     # Indicate that you will send in a piece of data about the emitter.
     #
-    # If you don't use the <tt>:as</tt> option, the name of the getter method will be guessed.
+    # Two general rules:
+    # * Take note of what Brighter Planet expects to receive. If you send <tt>fuel_economy</tt> and we're expecting <tt>fuel_efficiency</tt>, we won't understand! (Hint: use the <tt>:as</tt> option.)
+    # * Make sure <tt>#to_param</tt> is set up. The gem always calls <tt>#to_param</tt> before sending, so that's your change to key things by "EPA code" (fictional) or whatever else you want. (Hint: use the <tt>:key</tt> option.)
     #
     # There are two optional parameters:
-    # * <tt>:of</tt> - the owner of a nested characteristic. So to send <tt>model[name]</tt> you write <tt>provide :name, :of => :model</tt>
-    # * <tt>:as</tt> - the local getter name. So if Brighter Planet expects <tt>fuel_efficiency</tt>, and you only have <tt>fuel_economy</tt>, you can write <tt>provide :fuel_efficiency, :as => :fuel_economy</tt>.
+    # * <tt>:as</tt> - if Brighter Planet expects <tt>fuel_efficiency</tt>, and you say <tt>mpg</tt>, you can write <tt>provide :mpg, :as => :fuel_efficiency</tt>. This will result in a query like <tt>?fuel_efficiency=XYZ</tt>.
+    # * <tt>:key</tt> - if Brighter Planet expects a make's name ("Nissan") and you want to look things up by (fictional) "EPA code", you could say <tt>provide :make, :key => :epa_code</tt>. This will result in a query like <tt>?make[epa_code]=ABC</tt>.
     #
-    # For example:
-    #
-    #    emit_as :automobile do
-    #                                                       # Official Brighter Planet characteristic name       Your name for it
-    #      provide :model, :as => :carline_class            # model                                              carline_class
-    #      provide :name,  :of => :make, :as => :mfr_name   # make[name]                                         mfr_name
+    #                                                                  # What's sent to Brighter Planet
+    #    emit_as :automobile do                                        
+    #      provide :mpg,  :as => :fuel_efficiency                      # fuel_efficiency=my_car.mpg.to_param
+    #      provide :make, :key => :epa_code                            # make[epa_code]=my_car.make.to_param
+    #      # or really shaking things up...
+    #      provide :manufacturer, :as => :make, :key => :epa_code      # make[epa_code]=my_car.manufacturer.to_param
     #    end
+    #
+    # Note that no matter what you send to us, the gem always calls <b>to_param</b> on the emitter. In this example, it's up to you to make sure my_car.manufacturer.to_param returns an epa_code.
     def provide(attr_name, options = {})
       options = options.symbolize_keys
-      characteristic = if options.has_key? :of
-        # [ :mixer, :size ]
-        [options[:of], attr_name]
+      characteristic = if options.has_key? :as
+        # [ :mpg, :fuel_efficiency ]
+        [attr_name, options[:as]]
       else
-        # :oven_count
+        # :make
         attr_name
       end
-      # translation_table[[:mixer,:size]] = 'mixer_size'
-      translation_table[characteristic] = options[:as] || Array.wrap(characteristic).join('_')
+      # translation_table[:make] = 'epa_code'
+      translation_table[characteristic] = options[:key]
     end
     # japanese-style preferred
     alias :provides :provide

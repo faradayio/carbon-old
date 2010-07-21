@@ -5,14 +5,15 @@ begin
   require 'jeweler'
   Jeweler::Tasks.new do |gemspec|
     gemspec.name = 'carbon'
-    gemspec.summary = %q{A gem for calculating carbon footprints using Brighter Planet's Carbon Middleware service}
-    gemspec.description = %q{Carbon allows you to easily calculate the carbon footprint of various activities. This is an API for the Brighter Planet Carbon Middleware service.}
+    gemspec.summary = %q{Carbon is a Ruby API wrapper for the Brighter Planet emission estimate web service (http://carbon.brighterplanet.com).}
+    gemspec.description = %q{Carbon is a Ruby API wrapper for the Brighter Planet emission estimate web service (http://carbon.brighterplanet.com). By querying the web service, it can estimate the carbon emissions of many real-life objects, such as cars and houses, based on particular attributes that they may have.}
     gemspec.email = 'derek.kastner@brighterplanet.com'
     gemspec.homepage = 'http://carbon.brighterplanet.com/libraries'
-    gemspec.authors = ['Derek Kastner', 'Seamus Abshere']
+    gemspec.authors = ['Derek Kastner', 'Seamus Abshere', 'Andy Rossmeissl']
     gemspec.add_dependency 'activesupport', '>=2.3.5'
     gemspec.add_dependency 'nap', '>=0.4'
     gemspec.add_dependency 'timeframe', '>=0.0.7'
+    gemspec.add_dependency 'blockenspiel', '>=0.3.2'
 
     gemspec.add_development_dependency 'fakeweb', '>=1.2.8'
     # sabshere 7/16/10 if you're having trouble running specs, try "rspec spec" and/or "sudo gem install rspec --pre"

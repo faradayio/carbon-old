@@ -2,24 +2,41 @@ require 'spec_helper'
 
 class RentalCar
   include Carbon
-  attr_accessor :make, :model, :model_year, :fuel_economy
+  attr_accessor :model, :model_year, :fuel_economy
+  class Make
+    attr_accessor :name
+    def to_param
+      name
+    end
+  end
+  def make
+    @make ||= Make.new
+  end
   emit_as :automobile do
     provide :make
     provide :model
     provide :model_year
-    provide :fuel_efficiency, :as => :fuel_economy
+    provide :fuel_economy, :as => :fuel_efficiency
   end
 end
 
 class DonutFactory
   include Carbon
-  attr_accessor :smokestack_size, :oven_count, :mixer_size, :mixer_wattage, :employees
+  attr_accessor :smokestack_size, :oven_count, :employees
+  class Mixer
+    attr_accessor :upc
+    def to_param
+      upc
+    end
+  end
+  def mixer
+    @mixer ||= Mixer.new
+  end
   emit_as :factory do
     provide :smokestack_size
     provide :oven_count
-    provide :size, :of => :mixer
-    provide :wattage, :of => :mixer
-    provide :personnel, :as => :employees
+    provide :employees, :as => :personnel
+    provide :mixer, :key => :upc
   end
 end
 
@@ -60,19 +77,37 @@ describe Carbon do
       c.emission.should == 134.599
       c.emission.response.raw_request.object_id.should_not == first_raw_request.object_id
     end
+    
+    it "should recalculate if parameters change (though the options hash)" do
+      c = RentalCar.new
+      c.model = 'Acura'
+      c.model_year = 2003
+      c.fuel_economy = 32
+      c.emission.should == 134.599
+      first_raw_request = c.emission.response.raw_request
+      c.emission(:timeframe => Timeframe.new(:year => 2009)).should == 134.599
+      c.emission.response.raw_request.object_id.should_not == first_raw_request.object_id
+    end
   end
   
   describe 'synchronous (realtime) requests' do
-    it 'should handle complex attributes like mixer[size]' do
+    it 'should send simple params' do
       d = DonutFactory.new
-      d.mixer_size = 20
-      d.emission.request.body.should =~ /mixer\[size\]=20/
+      d.oven_count = 12_000
+      d.emission.request.body.should =~ /oven_count=12000/
+    end
+    
+    it 'send complex params' do
+      d = DonutFactory.new
+      d.mixer.upc = 123
+      d.emission.request.body.should =~ /mixer\[upc\]=123/
     end
   
     it 'should not send attributes that are blank' do
       d = DonutFactory.new
-      d.mixer_size = 20
+      d.mixer.upc = 123
       d.emission.request.body.should_not =~ /oven_count/
+      d.emission.request.body.should_not =~ /timeframe/
     end
   
     it 'should send the key' do
