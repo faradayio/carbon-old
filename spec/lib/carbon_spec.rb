@@ -171,6 +171,14 @@ describe Carbon do
       c.emission.instance_variable_get(:@method_missing).should be_nil
       c.emission.instance_variable_get(:@response).should be_nil
     end
+    
+    it "should raise an error on EmissionEstimate if method isn't found" do
+      c = RentalCar.new
+      lambda {
+        c.emission.foobar
+      }.should raise_error(NoMethodError, /EmissionEstimate/)
+      
+    end
   end
 end
 

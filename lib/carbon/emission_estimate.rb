@@ -40,8 +40,10 @@ module Carbon
     def method_missing(method_id, *args, &blk)
       if !block_given? and args.empty? and response.data.has_key? method_id.to_s
         response.data[method_id.to_s]
-      else
+      elsif response.number.respond_to? method_id
         response.number.send method_id, *args, &blk
+      else
+        super
       end
     end
 
