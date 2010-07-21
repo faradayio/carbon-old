@@ -4,6 +4,10 @@ Carbon is a Ruby API wrapper for the {Brighter Planet emission estimate web serv
 
 By querying the web service, it can estimate the carbon emissions of many real-life objects, such as cars and houses, based on particular attributes that they may have.
 
+== Full documentation
+
+Give the quick start a try! Once you've exhausted that, read the {carbon gem RDoc}[http://rdoc.info/projects/brighterplanet/carbon] for more.
+
 == Quick start
 
 <b>You'll need a Brighter Planet API key. See the "API keys" section below for details.</b>
@@ -52,20 +56,32 @@ When you want to calculate emissions, simply call <tt>RentalCar#emission</tt>.
     => "kilograms"
     > my_emission.methodology
     => "http://carbon.brighterplanet.com/automobiles.html?[...]"
-    
-=== Asynchronous queries
+
+== API keys
+
+You should get an API key from http://keys.brighterplanet.com and set it globally:
+
+    Carbon.key = '12903019230128310293'
+
+Now all of your queries will use that key.
+
+== A note on <tt>#to_param</tt>
+
+Once you understand how to map attributes using the DSL, you might still be confused about what the gem actually calls on your objects.
+
+The answer: <tt>#to_characteristic</tt> and, failing that, <tt>#to_param</tt>.
+
+Let's say <tt>RentalCar#make</tt> returns a <tt>Make</tt> object. You should define either <tt>Make#to_characteristic</tt> or <tt>Make#to_param</tt>. The gem <b>doesn't know</b> that you want it to call <tt>Make#name</tt> or <tt>Make#epa_code</tt> or anything else.
+
+== A note on asynchronous queries
 
 To request an emission estimate asynchronously, simply pass an URL as the <tt>:callback</tt> option to <tt>#emission</tt>:
 
     > RentalCar.new.emission :callback => http://example.com/my/callback/handler
 
-A good way to test this is to set up a {PostBin}[http://postbin.org]
+A good way to test this is to set up a {PostBin}[http://postbin.org].
 
-== Documentation
-
-Read the {carbon gem RDoc}[http://rdoc.info/projects/brighterplanet/carbon] for more.
-
-== Exceptions
+== A note on exceptions
 
 Since this gem connects to a web service, you need to be ready for network problems and latency. For example:
 
@@ -88,14 +104,6 @@ Since this gem connects to a web service, you need to be ready for network probl
       # The gem connects directly to Amazon SQS in order to provide maximum throughput. If that service returns anything other than success, you get this exception.
       # Please contact us at staff@brighterplanet.com if you see too many of these.
     end
-
-== API keys
-
-You should get an API key from http://keys.brighterplanet.com and set it globally:
-
-    Carbon.key = '12903019230128310293'
-
-Now all of your queries will use that key.
 
 == Copyright
 

@@ -28,6 +28,9 @@ class DonutFactory
   class Mixer
     attr_accessor :upc
     def to_param
+      raise "Use #to_characteristic instead please"
+    end
+    def to_characteristic
       upc
     end
   end
@@ -210,7 +213,16 @@ describe Carbon do
       lambda {
         c.emission.foobar
       }.should raise_error(NoMethodError, /EmissionEstimate/)
-      
+    end
+    
+    it "should use #to_characteristic instead of #to_param if it's available" do
+      d = DonutFactory.new
+      lambda {
+        d.mixer.to_param
+      }.should raise_error(RuntimeError, /instead please/)
+      lambda {
+        d.emission.to_f
+      }.should_not raise_error
     end
   end
 end

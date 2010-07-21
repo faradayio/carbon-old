@@ -23,7 +23,7 @@ module Carbon
     #
     # Two general rules:
     # * Take note of what Brighter Planet expects to receive. If you send <tt>fuel_economy</tt> and we're expecting <tt>fuel_efficiency</tt>, we won't understand! (Hint: use the <tt>:as</tt> option.)
-    # * Make sure <tt>#to_param</tt> is set up. The gem always calls <tt>#to_param</tt> before sending, so that's your change to key things by "EPA code" (fictional) or whatever else you want. (Hint: use the <tt>:key</tt> option.)
+    # * Make sure <tt>#to_characteristic</tt> or <tt>#to_param</tt> is set up. The gem always calls one of these (it will try <tt>#to_characteristic</tt> first) before sending, so that's your change to key things by "EPA code" (fictional) or whatever else you want. (Hint: use the <tt>:key</tt> option.)
     #
     # There are two optional parameters:
     # * <tt>:as</tt> - if Brighter Planet expects <tt>fuel_efficiency</tt>, and you say <tt>mpg</tt>, you can write <tt>provide :mpg, :as => :fuel_efficiency</tt>. This will result in a query like <tt>?fuel_efficiency=XYZ</tt>.
@@ -37,7 +37,7 @@ module Carbon
     #      provide :manufacturer, :as => :make, :key => :epa_code      # make[epa_code]=my_car.manufacturer.to_param
     #    end
     #
-    # Note that no matter what you send to us, the gem always calls <b>to_param</b> on the emitter. In this example, it's up to you to make sure my_car.manufacturer.to_param returns an epa_code.
+    # Note that no matter what you send to us, the gem always calls <b><tt>#to_characteristic</tt></b> (or, failing that, <tt>#to_param</tt>) on the emitter. In this example, it's up to you to make sure my_car.manufacturer.to_param returns an epa_code.
     def provide(attr_name, options = {})
       options = options.symbolize_keys
       characteristic = if options.has_key? :as

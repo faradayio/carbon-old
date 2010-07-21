@@ -38,7 +38,11 @@ module Carbon
             current_value = parent.emitter.send characteristic
             as = characteristic
           end
-          current_value = current_value.to_param
+          current_value = begin
+            current_value.to_characteristic
+          rescue NoMethodError
+            current_value.to_param
+          end
           if current_value.is_a?(FalseClass) or current_value.present?
             if key
               memo[as] ||= {}
