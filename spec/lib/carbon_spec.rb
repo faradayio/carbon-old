@@ -1,5 +1,7 @@
 require 'spec_helper'
 
+CALLBACK_URL = 'http://www.postbin.org/1dj0146'
+
 class RentalCar
   include Carbon
   attr_accessor :model, :model_year, :fuel_economy
@@ -86,6 +88,15 @@ describe Carbon do
       c.emission.should == 134.599
       first_raw_request = c.emission.response.raw_request
       c.emission(:timeframe => Timeframe.new(:year => 2009)).should == 134.599
+      c.emission.response.raw_request.object_id.should_not == first_raw_request.object_id
+    end
+    
+    it "should recalculate if the callback changes" do
+      c = RentalCar.new
+      c.model = 'Acura'
+      c.emission.should == 134.599
+      first_raw_request = c.emission.response.raw_request
+      c.emission.callback = CALLBACK_URL
       c.emission.response.raw_request.object_id.should_not == first_raw_request.object_id
     end
   end

@@ -6,27 +6,30 @@ module Carbon
         @parent = parent
       end
       def body
-        send "#{parent.mode}_body"
+        params.to_query
       end
-      def async_body # :nodoc:
-        params = params
-        params[:emitter] = parent.emitter.class.carbon_base.emitter_common_name
-        params[:callback] = parent.callback
-        params[:callback_content_type] = parent.callback_content_type
+      def params
+        send "#{parent.mode}_params"
+      end
+      def async_params # :nodoc:
+        hash = _params
+        hash[:emitter] = parent.emitter.class.carbon_base.emitter_common_name
+        hash[:callback] = parent.callback
+        hash[:callback_content_type] = parent.callback_content_type
         {
           :Action => 'SendMessage',
           :Version => '2009-02-01',
-          :MessageBody => params.to_query
-        }.to_query
+          :MessageBody => hash.to_query
+        }
       end
-      def realtime_body # :nodoc:
-        params.to_query
+      def realtime_params # :nodoc:
+        _params
       end
       # Used internally, but you can look if you want.
       #
       # Returns the params hash that will be send to the emission estimate server.
-      def params
-        params = parent.emitter.class.carbon_base.translation_table.inject({}) do |memo, translation|
+      def _params
+        hash = parent.emitter.class.carbon_base.translation_table.inject({}) do |memo, translation|
           characteristic, key = translation
           if characteristic.is_a? ::Array
             current_value = parent.emitter.send characteristic[0]
@@ -46,9 +49,9 @@ module Carbon
           end
           memo
         end
-        params[:timeframe] = parent.timeframe if parent.timeframe
-        params[:key] = parent.key if parent.key
-        params
+        hash[:timeframe] = parent.timeframe if parent.timeframe
+        hash[:key] = parent.key if parent.key
+        hash
       end
       def realtime_url # :nodoc:
         "#{::Carbon::REALTIME_URL}/#{parent.emitter.class.carbon_base.emitter_common_name.pluralize}.json"
