@@ -51,7 +51,6 @@ module Carbon
     attr_accessor :callback
     attr_accessor :timeframe
     
-    attr_reader :data
     attr_reader :emitter
     def request
       @request ||= Request.new self
