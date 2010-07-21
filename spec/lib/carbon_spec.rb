@@ -154,6 +154,17 @@ describe Carbon do
       }.should_not raise_error
     end
   end
+  
+  describe 'internally' do
+    it "should ignore invalid options passed to #emission" do
+      c = RentalCar.new
+      t = Timeframe.new(:year => 2009)
+      c.emission :timeframe => t, :method_missing => 'helo there', :response => 'foo'
+      c.emission.instance_variable_get(:@timeframe).object_id.should == t.object_id
+      c.emission.instance_variable_get(:@method_missing).should be_nil
+      c.emission.instance_variable_get(:@response).should be_nil
+    end
+  end
 end
 
 # an average car emits 6 tons of carbon in a year

@@ -14,8 +14,9 @@ module Carbon
       @emitter = emitter
     end
     
+    VALID_OPTIONS = [:callback_content_type, :key, :callback, :timeframe]
     def take_options(options = {})
-      options.each do |k, v|
+      options.slice(*VALID_OPTIONS).each do |k, v|
         instance_variable_set "@#{k}", v
       end
     end
