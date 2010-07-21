@@ -1,3 +1,6 @@
+require 'carbon/emission_estimate/response'
+require 'carbon/emission_estimate/request'
+
 module Carbon
   # Let's start off by saying that <tt>EmissionEstimate</tt> objects quack like numbers.
   #
@@ -7,40 +10,26 @@ module Carbon
   # 
   # Note: <b>you need to take care of storing emission estimates to local variables!</b> The gem doesn't cache these for you. Every time you call <tt>emission</tt> it will send another query to the server!
   class EmissionEstimate
-    attr_reader :data
-    def initialize(data)
-      @data = data
-      @number = data['emission'].to_f.freeze
+    def initialize(emitter)
+      @emitter = emitter
     end
-    def ==(other) # :nodoc:
-      other == @number
+    
+    def take_options(options = {})
+      options.each do |k, v|
+        instance_variable_set "@#{k}", v
+      end
     end
-    # Another way to access the emission value.
-    # Useful if you don't like treating <tt>EmissionEstimate</tt> objects like <tt>Numeric</tt> objects (even though they do quack like numbers...)
-    def emission_value
-      @number
+
+    # I can be compared directly to a number.
+    def ==(other)
+      case other
+      when Numeric
+        other == response.number
+      else
+        super
+      end
     end
-    # The units of the emission.
-    def emission_units
-      data['emission_units']
-    end
-    # The Timeframe the emission estimate covers.
-    #   > my_car.emission.timeframe.to_param
-    #   => '2009-01-01/2010-01-01'
-    def timeframe
-      Timeframe.interval data['timeframe']
-    end
-    # Errors (and warnings) as reported in the response.
-    # Note: may contain HTML tags like KBD or A
-    def errors
-      data['errors']
-    end
-    # The URL of the methodology report indicating how this estimate was calculated.
-    #   > my_car.emission.methodology
-    #   => 'http://carbon.brighterplanet.com/automobiles.html?[...]'
-    def methodology
-      data['methodology']
-    end
+
     # You can ask an EmissionEstimate object for any of the response data provided.
     # This is useful for characteristics that are unique to an emitter.
     #
@@ -48,11 +37,59 @@ module Carbon
     #   > my_car.emission.model
     #   => 'Ford Taurus'
     def method_missing(method_id, *args, &blk)
-      if !block_given? and args.empty? and data.has_key? method_id.to_s
-        data[method_id.to_s]
+      if !block_given? and args.empty? and response.data.has_key? method_id.to_s
+        response.data[method_id.to_s]
       else
-        @number.send method_id, *args, &blk
+        response.number.send method_id, *args, &blk
       end
+    end
+
+    attr_writer :callback_content_type
+    attr_writer :key
+
+    attr_accessor :callback
+    attr_accessor :timeframe
+    
+    attr_reader :data
+    attr_reader :emitter
+    def request
+      @request ||= Request.new self
+    end
+    # Here's where caching takes place.
+    def response
+      current_params = request.params
+      @response ||= {}
+      return @response[current_params] if @response.has_key? current_params
+      @response[current_params] = Response.new self
+    end
+    def mode
+      callback ? :async : :realtime
+    end
+    def callback_content_type
+      @callback_content_type || 'application/json'
+    end
+    def key
+      @key || ::Carbon.key
+    end
+    # Another way to access the emission value.
+    # Useful if you don't like treating <tt>EmissionEstimate</tt> objects like <tt>Numeric</tt> objects (even though they do quack like numbers...)
+    def emission_value
+      response.number
+    end
+    # The units of the emission.
+    def emission_units
+      response.data['emission_units']
+    end
+    # Errors (and warnings) as reported in the response.
+    # Note: may contain HTML tags like KBD or A
+    def errors
+      response.data['errors']
+    end
+    # The URL of the methodology report indicating how this estimate was calculated.
+    #   > my_car.emission.methodology
+    #   => 'http://carbon.brighterplanet.com/automobiles.html?[...]'
+    def methodology
+      response.data['methodology']
     end
   end
 end
