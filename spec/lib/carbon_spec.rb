@@ -173,6 +173,7 @@ describe Carbon do
       c = RentalCar.new
       c.emission.callback = CALLBACK_URL
       c.emission.emission_value.should be_nil
+      c.emission.emission_units.should be_nil
       c.emission.methodology.should be_nil
     end
     
