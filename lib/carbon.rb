@@ -51,6 +51,8 @@ module Carbon
   end
   class RateLimited < RuntimeError # :nodoc:
   end
+  class TriedToUseAsyncResponseAsNumber < RuntimeError # :nodoc:
+  end
 
   # The api key obtained from http://keys.brighterplanet.com
   mattr_accessor :key

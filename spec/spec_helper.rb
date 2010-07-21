@@ -10,17 +10,20 @@ require 'active_support/json/encoding'
 require 'carbon'
 
 require 'fakeweb'
-{
-  'automobiles' => {
+[
+  [ /http:\/\/carbon.brighterplanet.com\/automobiles/, {
     'emission' => '134.599',
     'emission_units' => 'kilograms',
     'methodology' => 'http://carbon.brighterplanet.com/something'
-  },
-  'factories' => {
+  }.to_json],
+  [ /http:\/\/carbon.brighterplanet.com\/factories/, {
     'emission' => 1000.0,
     'emission_units' => 'kilograms',
     'methodology' => 'http://carbon.brighterplanet.com/something'
-  }
-}.each do |k, v|
-  FakeWeb.register_uri :post, /http:\/\/carbon.brighterplanet.com\/#{k}/, :body => v.to_json
+  }.to_json],
+  [ /https:\/\/queue.amazonaws.com/,
+    'Nothing to see here.']
+].each do |url_matcher, response|
+  FakeWeb.register_uri :post, url_matcher, :body => response
 end
+

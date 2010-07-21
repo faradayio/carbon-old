@@ -2,7 +2,9 @@ require 'carbon/emission_estimate/response'
 require 'carbon/emission_estimate/request'
 
 module Carbon
-  # Let's start off by saying that <tt>EmissionEstimate</tt> objects quack like numbers.
+  # Let's start off by saying that realtime <tt>EmissionEstimate</tt> objects quack like numbers.
+  #
+  # If you ask for a callback, on the other hand, you can't use them as numbers.
   #
   # So, you can just say <tt>my_car.emission</tt> and you'll get something like <tt>4308.29</tt>.
   #
@@ -22,10 +24,9 @@ module Carbon
       end
     end
 
-    # I can be compared directly to a number.
+    # I can be compared directly to a number, unless I'm an async request.
     def ==(other)
-      case other
-      when Numeric
+      if other.is_a? ::Numeric and mode == :realtime
         other == response.number
       else
         super
@@ -41,7 +42,8 @@ module Carbon
     def method_missing(method_id, *args, &blk)
       if !block_given? and args.empty? and response.data.has_key? method_id.to_s
         response.data[method_id.to_s]
-      elsif response.number.respond_to? method_id
+      elsif ::Float.method_defined? method_id
+        raise TriedToUseAsyncResponseAsNumber if mode == :async
         response.number.send method_id, *args, &blk
       else
         super

@@ -165,11 +165,32 @@ describe Carbon do
   describe 'asynchronous (queued) requests' do
     it 'should post a message to SQS' do
       c = RentalCar.new
-      c.emission.callback = 'http://www.postbin.org/1dj0146'
+      c.emission.callback = CALLBACK_URL
       c.emission.request.url.should =~ /queue.amazonaws.com/
+    end
+    
+    it 'should have nil data in its response' do
+      c = RentalCar.new
+      c.emission.callback = CALLBACK_URL
+      c.emission.emission_value.should be_nil
+      c.emission.methodology.should be_nil
+    end
+    
+    it "should not compare itself to numbers" do
+      c = RentalCar.new
+      c.emission.callback = CALLBACK_URL
+      c.emission.should_not == 0.0
+    end
+    
+    it 'should not allow itself to be treated as a number' do
+      c = RentalCar.new
+      c.emission.callback = CALLBACK_URL
       lambda {
-        c.emission :timeframe => Timeframe.new(:year => 2009), :callback => 'http://www.postbin.org/1dj0146'
-      }.should_not raise_error
+        c.emission + 5
+      }.should raise_error(::Carbon::TriedToUseAsyncResponseAsNumber)
+      lambda {
+        c.emission.to_f
+      }.should raise_error(::Carbon::TriedToUseAsyncResponseAsNumber)
     end
   end
   
