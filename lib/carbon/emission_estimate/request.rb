@@ -36,7 +36,7 @@ module Carbon
             as = characteristic
           end
           current_value = current_value.to_param
-          if current_value.present?
+          if current_value.is_a?(FalseClass) or current_value.present?
             if key
               memo[as] ||= {}
               memo[as][key] = current_value

@@ -109,6 +109,12 @@ describe Carbon do
       d.emission.request.body.should_not =~ /oven_count/
       d.emission.request.body.should_not =~ /timeframe/
     end
+    
+    it 'should send attributes that are false' do
+      d = DonutFactory.new
+      d.mixer.upc = false
+      d.emission.request.body.should include({:mixer => { :upc => 'false' }}.to_query)
+    end
   
     it 'should send the key' do
       d = DonutFactory.new
