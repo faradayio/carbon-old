@@ -26,7 +26,11 @@ module Carbon
         end
         raise ::Carbon::RealtimeEstimateFailed unless response.success?
         @data = ::ActiveSupport::JSON.decode response.body
+        instantiate_known_response_objects
         @number = data['emission'].to_f.freeze
+      end
+      def instantiate_known_response_objects # :nodoc:
+        data['active_subtimeframe'] = ::Timeframe.interval(data['active_subtimeframe']) if data.has_key? 'active_subtimeframe'
       end
       def load_async_data # :nodoc:
         response = perform
