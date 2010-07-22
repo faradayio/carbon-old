@@ -44,11 +44,11 @@ In order to calculate carbon emissions, we need to map the car's relevant attrib
       end
     end
 
-When you want to calculate emissions, simply call <tt>RentalCar#emission</tt>.
+When you want to calculate emissions, simply call <tt>RentalCar#emission_estimate</tt>.
 
     > my_car = RentalCar.new([...])
     => #<RentalCar [...]>
-    > my_emission = my_car.emission
+    > my_emission = my_car.emission_estimate
     => #<Carbon::EmissionEstimate [...]>
     > my_emission.to_f
     => 4919.2
@@ -75,9 +75,9 @@ Let's say <tt>RentalCar#make</tt> returns a <tt>Make</tt> object. You should def
 
 == A note on asynchronous queries
 
-To request an emission estimate asynchronously, simply pass an URL as the <tt>:callback</tt> option to <tt>#emission</tt>:
+To request an emission estimate asynchronously, simply pass an URL as the <tt>:callback</tt> option to <tt>#emission_estimate</tt>:
 
-    > RentalCar.new.emission :callback => http://example.com/my/callback/handler
+    > RentalCar.new.emission_estimate :callback => http://example.com/my/callback/handler
 
 A good way to test this is to set up a {PostBin}[http://postbin.org].
 
@@ -86,7 +86,7 @@ A good way to test this is to set up a {PostBin}[http://postbin.org].
 Since this gem connects to a web service, you need to be ready for network problems and latency. For example:
 
     begin
-      my_emission = my_car.emission
+      my_emission = my_car.emission_estimate
     rescue ::SocketError, ::Timeout::Error, ::Errno::ETIMEDOUT, ::Errno::ENETUNREACH, ::Errno::ECONNRESET, ::Errno::ECONNREFUSED
       # These are general network errors raised by Net::HTTP.
       # Your internet connection might be down, or our servers might be down.

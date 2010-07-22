@@ -35,7 +35,7 @@ require 'carbon/emission_estimate'
 # * A rental car emits carbon like an "automobile", which is one of Brighter Planet's recognized emitter classes.
 # * Your implementation can provide up to three data points about a rental car: its make, its model, and its model year (but not necessarily all of them, all the time.)
 #
-# Once you've mixed in <tt>Carbon</tt>, you get the method <tt>emission</tt>, which you can call at any time to request an emission estimate.
+# Once you've mixed in <tt>Carbon</tt>, you get the method <tt>emission_estimate</tt>, which you can call at any time to request an emission estimate.
 module Carbon
   def self.included(klass) # :nodoc:
     klass.cattr_accessor :carbon_base
@@ -82,10 +82,10 @@ module Carbon
   # Note: please see the README about <b>exceptions that you should watch out for</b>.
   # 
   # You can use it like a number...
-  #   > my_car.emission + 5.1
+  #   > my_car.emission_estimate + 5.1
   #   => 415.39
   # Or you can get information about the response
-  #   > my_car.emission.methodology
+  #   > my_car.emission_estimate.methodology
   #   => 'http://carbon.brighterplanet.com/automobiles.html?[...]'
   #
   # === Options:
@@ -99,5 +99,4 @@ module Carbon
     @emission_estimate.take_options options
     @emission_estimate
   end
-  alias :emission :emission_estimate
 end
