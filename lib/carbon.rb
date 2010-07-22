@@ -73,7 +73,7 @@ module Carbon
       self.carbon_base ||= ::Carbon::Base.new self, emitter_common_name
       ::Blockenspiel.invoke block, carbon_base
     end
-    # japanese-style preferred
+    # Third-person singular preferred.
     alias :emits_as :emit_as
   end
 

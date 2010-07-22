@@ -50,7 +50,7 @@ module Carbon
       # translation_table[:make] = 'epa_code'
       translation_table[characteristic] = options[:key]
     end
-    # japanese-style preferred
+    # Third-person singular preferred.
     alias :provides :provide
   end
 end
