@@ -5,11 +5,11 @@
 
 Gem::Specification.new do |s|
   s.name = %q{carbon}
-  s.version = "0.2.2"
+  s.version = "0.2.3"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Derek Kastner", "Seamus Abshere", "Andy Rossmeissl"]
-  s.date = %q{2010-07-21}
+  s.date = %q{2010-07-22}
   s.description = %q{Carbon is a Ruby API wrapper for the Brighter Planet emission estimate web service (http://carbon.brighterplanet.com). By querying the web service, it can estimate the carbon emissions of many real-life objects, such as cars and houses, based on particular attributes that they may have.}
   s.email = %q{derek.kastner@brighterplanet.com}
   s.extra_rdoc_files = [
