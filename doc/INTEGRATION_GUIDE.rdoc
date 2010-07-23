@@ -1,0 +1,896 @@
+= Emission estimate integration guide
+
+Using real examples from the July 2010 integration of http://brighterplanet.com with the carbon middleware emission estimate web service.
+
+== Step 1: Get an early win
+
+Convert just one legacy class to use the web service. All you want is a number back, any number!
+
+Here's what we changed:
+
+    vidalia:~/app1 (practice_migration) $ git diff master..practice_migration
+    diff --git a/Gemfile b/Gemfile
+    index 1d582d4..acccc7e 100644
+    --- a/Gemfile
+    +++ b/Gemfile
+    @@ -15,6 +15,7 @@ gem 'tzinfo', '0.3.20' # otherwise doesn't recognize timezone
+     # gem 'mime-types', '1.16', :require => 'mime/types' # twitter_oauth
+     # --
+ 
+    +gem 'carbon', '0.2.4'
+     gem 'simple-rss', '1.2.2'
+     gem 'httparty', '0.6.1'
+     gem 'thinking-sphinx', '1.3.16', :require => 'thinking_sphinx'
+    diff --git a/app/models/automobile_fuel_type.rb b/app/models/automobile_fuel_type.rb
+    index 30bb0c7..aaa4f49 100644
+    --- a/app/models/automobile_fuel_type.rb
+    +++ b/app/models/automobile_fuel_type.rb
+    @@ -7,6 +7,10 @@ class AutomobileFuelType < ActiveRecord::Base
+         attributes.slice 'code'
+       end
+   
+    +  def to_characteristic
+    +    code
+    +  end
+    +  
+       class << self
+         # don't show electricity (plug-in) per Matt https://brighterplanet.sifterapp.com/projects/30/issues/341/comments
+         def for_collection_select(*args)
+    diff --git a/app/models/automobile_make.rb b/app/models/automobile_make.rb
+    index f3e7798..3133406 100644
+    --- a/app/models/automobile_make.rb
+    +++ b/app/models/automobile_make.rb
+    @@ -17,6 +17,10 @@ class AutomobileMake < ActiveRecord::Base
+       def to_s
+         name
+       end
+    +  
+    +  def to_characteristic
+    +    name
+    +  end
+ 
+       # leave this for later if we need it
+       SUBSIDIARIES = {
+    diff --git a/app/models/automobile_model.rb b/app/models/automobile_model.rb
+    index 1620b3a..870a6c5 100644
+    --- a/app/models/automobile_model.rb
+    +++ b/app/models/automobile_model.rb
+    @@ -24,6 +24,10 @@ class AutomobileModel < ActiveRecord::Base
+         name
+       end
+   
+    +  def to_characteristic
+    +    "#{make.to_characteristic} #{name}"
+    +  end
+    +  
+       def fuel_efficiency(options = {})
+         urbanity = options[:urbanity] || Automobile.fallback.urbanity
+         urbanity * AutomobileVariant.average(:fuel_efficiency_city, :conditions => { :automobile_model_id => id }) + 
+    diff --git a/app/models/automobile_model_year.rb b/app/models/automobile_model_year.rb
+    index 36a1714..32b5c1f 100644
+    --- a/app/models/automobile_model_year.rb
+    +++ b/app/models/automobile_model_year.rb
+    @@ -29,4 +29,9 @@ class AutomobileModelYear < ActiveRecord::Base
+       def to_i
+         year.to_i
+       end
+    +  
+    +  def to_characteristic
+    +    year
+    +  end
+    +  
+     end
+    diff --git a/app/models/automobile_size_class.rb b/app/models/automobile_size_class.rb
+    index e62b80d..5ed1e2a 100644
+    --- a/app/models/automobile_size_class.rb
+    +++ b/app/models/automobile_size_class.rb
+    @@ -7,6 +7,10 @@ class AutomobileSizeClass < ActiveRecord::Base
+         attributes.slice 'name'
+       end
+   
+    +  def to_characteristic
+    +    name
+    +  end
+    +  
+       class << self
+         def for_collection_select(*args)
+           all :order => :id
+    diff --git a/app/models/emitters/automobile.rb b/app/models/emitters/automobile.rb
+    index d2d852c..e7aa8a6 100644
+    --- a/app/models/emitters/automobile.rb
+    +++ b/app/models/emitters/automobile.rb
+    @@ -1,4 +1,42 @@
+     class Automobile < Emitter
+    +  include Carbon
+    +  
+    +  emit_as :automobile do
+    +    provide :make
+    +    provide :model
+    +    provide :model_year_proxy, :as => :model_year
+    +    # provide :variant - what to key on?
+    +    provide :fuel_type
+    +    provide :size_class
+    +    provide :fuel_efficiency
+    +    provide :urbanity
+    +    provide :hybridity
+    +    provide :daily_distance_estimate
+    +    provide :daily_duration
+    +    provide :weekly_distance_estimate
+    +    provide :annual_distance_estimate
+    +    provide :acquisition
+    +    provide :retirement
+    +  end
+    +  
+    +  # app1 model years are just years - 1999
+    +  # cm1 model years are composites of year and model - Acura TSX 1999
+    +  # so we have to proxy it
+    +  class ModelYearProxy
+    +    attr_reader :parent
+    +    def initialize(parent)
+    +      @parent = parent
+    +    end
+    +    def to_characteristic
+    +      if parent.model and parent.model_year
+    +        "#{parent.model.to_characteristic} #{parent.model_year.to_characteristic}"
+    +      end
+    +    end
+    +  end
+    +  def model_year_proxy
+    +    @model_year_proxy ||= ModelYearProxy.new self
+    +  end
+    +    
+    diff --git a/config/initializers/carbon_middleware.rb b/config/initializers/carbon_middleware.rb
+    new file mode 100644
+    index 0000000..8becc5f
+    --- /dev/null
+    +++ b/config/initializers/carbon_middleware.rb
+    @@ -0,0 +1 @@
+    +::Carbon.key = '[Get your own at http://keys.brighterplanet.com]'
+
+
+And then we could do...
+
+    >> a = Automobile.find 710
+    => #<Automobile [...]>
+    >> a.emission(Timeframe.this_year)                              # legacy call
+    => 7040.88102017319
+    >> a.emission_estimate(:timeframe => Timeframe.this_year).to_f  # outsourced (new) call
+    => 7040.88102017319
+
+An early win!
+
+=== Comments on step 1
+
+* We're using Ruby on Rails and so we can use the official {carbon gem}[http://rubygems.org/gems/carbon]. If you're not on Ruby on Rails, please contact us for extra support in other languages or frameworks. If we don't have a library for it, we will help shoulder the burden of developing one.
+
+* We mapped all of the attributes of an Automobile that the web service recognizes.
+
+* One characteristic causes us trouble: model_year. The web service expects "Acura TSX 1999", but if you just called <tt>Automobile#model_year</tt> in the legacy app, you would get "1999". So, we map the characteristic "model_year" to <tt>Automobile#model_year_proxy</tt>, which responds with a <tt>ModelYearProxy</tt> object, which, in turn, responds to <tt>ModelYearProxy#to_characteristic</tt>.
+
+* Note the similarity of the legacy call <tt>Automobile#emission</tt> to the outsourced call <tt>Automobile#emission_estimate</tt>. That's because the carbon gem and our website have a lot of shared code history.
+
+== Step 2: Apply the outsourced method call in interface code
+
+Rather than getting really deep into replacing the business logic of your legacy emitter classes, try to hit interface problems early.
+
+Out of all the emitter classes, we've only converted the Automobile class, so for now we have to make sure the interface knows how to render both kinds: outsourced and legacy.
+
+Here's what we changed:
+
+    vidalia:~/app1 (practice_migration) $ git diff master..practice_migration
+    diff --git a/app/models/emitter.rb b/app/models/emitter.rb
+    index 8603f22..93971b7 100644
+    --- a/app/models/emitter.rb
+    +++ b/app/models/emitter.rb
+    @@ -1,5 +1,10 @@
+     # todo dry emblem
+     class Emitter < ActiveRecord::Base
+    +  # Whether emission estimates for this class have been outsourced to Brighter Planet
+    +  def outsourced?
+    +    respond_to? :emission_estimate
+    +  end
+    +  
+       self.abstract_class = true
+
+       extend ActiveSupport::Memoizable if Switches.memoization?
+    @@ -304,7 +313,11 @@ class Emitter < ActiveRecord::Base
+         if respond_to? :emission_date
+           timeframe.include? emission_date
+         elsif self.class.characterization.characteristics.include? :active_subtimeframe
+    -      timeframe & committee_reports[:active_subtimeframe]
+    +      if outsourced?
+    +        nil # don't know how to get active_subtimeframe
+    +      else
+    +        timeframe & committee_reports[:active_subtimeframe]
+    +      end
+         end
+       end
+    diff --git a/app/models/component.rb b/app/models/component.rb
+    index 24e359a..b00ba5d 100644
+    --- a/app/models/component.rb
+    +++ b/app/models/component.rb
+    @@ -232,7 +232,13 @@ class Component
+      def emission_from_imperfect_emitters(timeframe, perspective)
+        # unlike preterite components, we have to leave data interpolation up to the emitter, so this is all-or-nothing 
+        if emitters_present_during? timeframe
+    -      emitters.values.flatten.sum { |emitter| emitter.as_of(perspective).emission(timeframe, perspective).to_f }
+    +      emitters.values.flatten.sum do |emitter|
+    +        if emitter.outsourced?
+    +          emitter.as_of(perspective).emission_estimate(:timeframe => timeframe).to_f # dropping perspective
+    +        else
+    +          emitter.as_of(perspective).emission(timeframe, perspective).to_f
+    +        end
+    +      end
+        else
+          typical_emission_from_emitters(timeframe)
+        end
+    @@ -248,7 +254,13 @@ class Component
+          puts "      Looking at subtimeframe #{subtimeframe.from} - #{subtimeframe.to}" if Component::DEBUG
+          if emitters_present_during? subtimeframe # we want to use emissions committee for the period BETWEEN profile creation and the end of last month for which we have emitters
+            puts "      --> Emitters present!" if Component::DEBUG
+    -        e = preterite_emitters.sum { |emitter| emitter.emission(subtimeframe, perspective).to_f }
+    +        e = preterite_emitters.sum do |emitter|
+    +          if emitter.outsourced?
+    +            emitter.emission_estimate(:timeframe => subtimeframe).to_f # dropping perspective
+    +          else
+    +            emitter.emission(subtimeframe, perspective).to_f
+    +          end
+    +        end
+            puts "      --> Adding #{e}" if Component::DEBUG
+            e
+          elsif emitters_present? and profile.created_at.to_date <= subtimeframe.from and subtimeframe.to < Date.new(Time.now.year, Time.now.month, 1) # we want to use 0 for the period BETWEEN profile creation and the end of the last month for which we have no emitters IF there are any emitters at all, ever.
+    @@ -261,7 +273,14 @@ class Component
+            e
+          end
+        end
+    -    emission_from_patterns = (patterns.sum { |pattern| pattern.emission(timeframe, perspective).to_f }) || 0
+    +    emission_from_patterns = patterns.sum do |pattern|
+    +      if pattern.outsourced?
+    +        pattern.emission_estimate(:timeframe => timeframe).to_f # dropping perspective
+    +      else
+    +        pattern.emission(timeframe, perspective).to_f
+    +      end
+    +    end
+    +    emission_from_patterns ||= 0
+        if emitters_present_during? timeframe # normally pattern emissions are *added to* preterite emitter emissions
+          emission_during_timeframe += emission_from_patterns
+        elsif emission_from_patterns.nonzero? # if there's no real emitters, but there are patterns established, the patterns *replace* placeholders
+    @@ -270,6 +289,7 @@ class Component
+        emission_during_timeframe
+      end
+
+    +  # Component#emission, not to be confused with Emitter#emission
+      def emission(timeframe, perspective = Time.zone.today)
+        return 0 if disabled?
+        unless @emission and @emission[timeframe.hash] and @emission[timeframe.hash][perspective.hash]
+    diff --git a/app/helpers/emitters_helper.rb b/app/helpers/emitters_helper.rb
+    index c1b75ee..e526ba1 100755
+    --- a/app/helpers/emitters_helper.rb
+    +++ b/app/helpers/emitters_helper.rb
+    @@ -3,7 +3,7 @@
+ 
+     module EmittersHelper
+       def render_characteristic(emitter, characteristic)
+    -    characteristic_value = emitter.characteristics.has_key?(characteristic) ? emitter.characteristics[characteristic] : emitter.committee_reports[characteristic]
+    +    characteristic_value = (emitter.outsourced? or emitter.characteristics.has_key?(characteristic)) ? emitter.characteristics[characteristic] : emitter.committee_reports[characteristic]
+         locals = { :emitter => emitter, :characteristic => characteristic, characteristic => characteristic_value }
+     
+         begin
+    @@ -14,7 +14,7 @@ module EmittersHelper
+       end
+   
+       def render_edit_characteristic(emitter, characteristic)
+    -    characteristic_value = emitter.characteristics.has_key?(characteristic) ? emitter.characteristics[characteristic] : emitter.committee_reports[characteristic]
+    +    characteristic_value = (emitter.outsourced? or emitter.characteristics.has_key?(characteristic)) ? emitter.characteristics[characteristic] : emitter.committee_reports[characteristic]
+         locals = { :emitter => emitter, :characteristic => characteristic, characteristic => characteristic_value }
+         template = pick_edit_partial(emitter, characteristic)
+         if template == 'characteristics/controls/collection_select'
+    @@ -80,7 +80,7 @@ module EmittersHelper
+       end
+   
+       def render_placeholder_characteristic(emitter, characteristic)
+    -    characteristic_value = emitter.characteristics.has_key?(characteristic) ? emitter.characteristics[characteristic] : emitter.committee_reports[characteristic]
+    +    characteristic_value = (emitter.outsourced? or emitter.characteristics.has_key?(characteristic)) ? emitter.characteristics[characteristic] : emitter.committee_reports[characteristic]
+         locals = { :emitter => emitter, :characteristic => characteristic, characteristic => characteristic_value }
+         render :partial => "#{emitter.common_plural}/#{characteristic}/placeholder", :layout => 'characteristics/layouts/placeholder', :locals => locals
+       rescue ActionView::MissingTemplate
+    diff --git a/app/views/characteristics/_characteristic.html.erb b/app/views/characteristics/_characteristic.html.erb
+    index c08003d..5e5ff1f 100644
+    --- a/app/views/characteristics/_characteristic.html.erb
+    +++ b/app/views/characteristics/_characteristic.html.erb
+    @@ -1,7 +1,7 @@
+     <%
+     known = !(known == false)
+     expanded = (expanded == true)
+    -reported = emitter.committee_reports.keys.include? characteristic # this should never happen if known
+    +reported = !emitter.outsourced? and emitter.committee_reports.keys.include? characteristic # this should never happen if known
+     element_class = [characteristic]
+     element_class << 'reported' if reported
+     element_class << 'next' if expanded
+    diff --git a/app/views/carbon_offsets/_emitter.html.erb b/app/views/carbon_offsets/_emitter.html.erb
+    index 61cd499..b006892 100644
+    --- a/app/views/carbon_offsets/_emitter.html.erb
+    +++ b/app/views/carbon_offsets/_emitter.html.erb
+    @@ -1,5 +1,9 @@
+    <%
+    -emission = emitter.emission timeframe
+    +emission = if emitter.outsourced?
+    +  emitter.emission_estimate(:timeframe => timeframe).to_f
+    +else
+    +  emitter.emission timeframe
+    +end
+    return unless emission.kilograms.to(:tons) > CustomPackage::MINIMUM_CARBON_OFFSET_IN_TONS
+    custom_package = {
+      :carbon_offset => emission,
+    diff --git a/app/views/components/_gaps.html.erb b/app/views/components/_gaps.html.erb
+    index 203d261..6e13b6f 100644
+    --- a/app/views/components/_gaps.html.erb
+    +++ b/app/views/components/_gaps.html.erb
+    @@ -1,5 +1,5 @@
+     <% if component.tense == :imperfect %>
+    -  <% covered_timeframes = component.emitters.values.flatten.collect { |e| e.committee_reports(timeframe)[:active_subtimeframe] } %>
+    +  <% covered_timeframes = component.emitters.values.flatten.collect { |e| e.outsourced? ? nil : e.committee_reports(timeframe)[:active_subtimeframe] } %>
+       <% unless timeframe.covered_by? *covered_timeframes %>
+       <% gaps = timeframe.gaps_left_by(*covered_timeframes) %>
+       <p><strong>Note:</strong> you haven't told us about any <%= component.class.component_name %> emissions during <%= gaps.to_sentence %>. If you <%= component.verb[:past] %> <%= component.class.component_name.pluralize %> during these times, please tell us about it.</p>
+    diff --git a/app/views/components/show.html.erb b/app/views/components/show.html.erb
+    index 3a89238..1479f2e 100644
+    --- a/app/views/components/show.html.erb
+    +++ b/app/views/components/show.html.erb
+    @@ -75,7 +75,11 @@
+    <% @component.emitters.values.flatten.partition(&:retired?).reverse.flatten.each do |e| %>
+      <li class="<%= e.emblem %><%= ' retired' if e.retired? %>">
+        <p class="size">
+    -      <%= e.emission(@timeframe).kilograms.to(:tons, 2) %> tons
+    +      <% if e.outsourced? %>
+    +        <%= e.emission_estimate(:timeframe => @timeframe).to_f.kilograms.to(:tons, 2) %> tons
+    +      <% else %>
+    +        <%= e.emission(@timeframe).kilograms.to(:tons, 2) %> tons
+    +      <% end %>
+        </p>
+          <h5><%= link_to e.name, e %><%= ' (retired)' if e.retired? %></h5>
+        <%= render :partial => 'carbon_offsets/emitter', :locals => { :emitter => e, :timeframe => @timeframe, :show_purchasing => viewing_self?(@user), :show_granting => false } %>
+    diff --git a/app/views/emitters/update.js.rjs b/app/views/emitters/update.js.rjs
+    index b325e97..5967500 100644
+    --- a/app/views/emitters/update.js.rjs
+    +++ b/app/views/emitters/update.js.rjs
+    @@ -15,7 +15,11 @@ if @wizard
+         page.visual_effect :fade, "#{common_name}_#{@characteristic}"
+         page.visual_effect :appear, "#{common_name}_#{next_characteristic}"
+       else
+    -    emission = @emitter.emission Timeframe.new(Time.zone.today, Time.zone.today.tomorrow.tomorrow)
+    +    emission = if @emitter.outsourced?
+    +      @emitter.emission Timeframe.new(Time.zone.today, Time.zone.today.tomorrow.tomorrow)
+    +    else
+    +      @emitter.emission_estimate(:timeframe => Timeframe.new(Time.zone.today, Time.zone.today.tomorrow.tomorrow)).to_f
+    +    end
+         custom_package = {
+           :carbon_offset => emission,
+           :short_title => 'Travel emissions',
+    diff --git a/app/views/emissions/_footprint.html.erb b/app/views/emissions/_footprint.html.erb
+    index 89bcfe5..69c27a4 100644
+    --- a/app/views/emissions/_footprint.html.erb
+    +++ b/app/views/emissions/_footprint.html.erb
+    @@ -5,7 +5,7 @@
+         <%= render :partial => "#{footprintable.common_plural}/footprint", :locals => { :emitter => footprintable, :timeframe => timeframe } %>
+       <% end %>
+
+    -  <span class="footprint"><span class="number"><%= footprintable.emission(timeframe).kilograms.to(:tons).adaptive_round %></span> tons CO<sub>2</sub></span>
+    +  <span class="footprint"><span class="number"><%= ((footprintable.is_a?(Emitter) and footprintable.outsourced?) ? footprintable.emission_estimate(:timeframe => timeframe) : footprintable.emission(timeframe)).to_f.kilograms.to(:tons).adaptive_round %></span> tons CO<sub>2</sub></span>
+
+       <%= render :partial => 'emissions/extraneous', :locals => { :timeframe => timeframe } if footprintable.is_a?(Emitter) and !footprintable.emitted_during_timeframe?(timeframe) %>
+    diff --git a/app/views/emitters/_sidebar.html.erb b/app/views/emitters/_sidebar.html.erb
+    index 7f0c8d0..2da2214 100644
+    --- a/app/views/emitters/_sidebar.html.erb
+    +++ b/app/views/emitters/_sidebar.html.erb
+    @@ -4,6 +4,11 @@
+        <%= render :partial => 'emissions/footprint', :locals => { :footprintable => emitter, :timeframe => timeframe } %>
+        <%#= render :partial => 'introduction', :locals => { :emitter => emitter, :component => component } %>
+        <%= render :partial => 'carbon_offsets/emitter', :locals => { :emitter => emitter, :timeframe => timeframe, :show_purchasing => true, :show_granting => true } %>
+    +<% if emitter.outsourced? %>
+    +    <p class="committee_reports">
+    +      <%= link_to 'Show calculation methods', emitter.emission_estimate.methodology %>
+    +    </p>
+    +<% else %>
+        <p class="committee_reports">
+    <%=
+    link_to_function 'Show calculation methods' do |page|
+    @@ -28,6 +33,7 @@ end
+        <% end %>
+        </ol>
+        <%= render :partial => 'emissions/methodology' %>
+    -  </div>
+    +<% end %>
+    +</div>
+    <% end %>
+
+=== Comments on step 2
+
+* The legacy method <tt>Automobile#committee_reports</tt> is disappearing. We're going to have to look into that.
+
+* We're don't have any way to pass in "perspective" for the outsourced emitters. Also going to have to deal with that.
+
+* One big win is to be found in <tt>app/views/emitters/_sidebar.html.erb</tt>. If we're dealing with an outsourced emitter class, we can link to the web service's methodology report instead of trying to explain the calculations locally. If you outsource the hard science to Brighter Planet, it's nice to know that we'll also explain it for you!
+
+== Step 3: Decide if you will be able to finish the job
+
+You know you can get a number (step 1) and apply it to the interface (step 2). But does the web service provide everything you need?
+
+For us, the potential show-stoppers were "committee reports", byproducts of the local calculation process. <b>Once we outsourced calculation, these values weren't being generated locally.</b>
+
+In step 2, we cheated by ignoring them and showing nothing. We used to exploit them as helpful defaults for interface elements:
+
+link:../doc/with-committee-reports.png
+
+After step two, it looked like this:
+
+link:../doc/without-committee-reports.png
+
+Let's take a closer look at what the emission estimate web service returns.
+
+    >> a = Automobile.find 710
+    => #<Automobile id [...] >
+    >> pp a.emission_estimate.response.data
+    {"emission_units"=>"kilograms",
+     "timeframe"=>"2010-01-01/2011-01-01",
+     "acquisition"=>Wed, 01 Jul 2009,
+     "adjusted_fuel_efficiency"=>8.50287,
+     "fuel_efficiency_multiplier"=>1.0,
+     "annual_distance"=>24140.2,
+     "fuel_type"=>
+      {"automobile_fuel_type"=>
+        {"name"=>"regular gasoline",
+         "created_at"=>"2010-05-15T01:31:58Z",
+         "code"=>"R",
+         "annual_distance"=>18161.0,
+         "emission_factor_units"=>"kilograms_per_litre",
+         "updated_at"=>"2010-05-27T01:26:14Z",
+         "annual_distance_units"=>"kilometres",
+         "emission_factor"=>2.48}},
+     "errors"=>[],
+     "nominal_fuel_efficiency"=>7.88765178259689,
+     "retirement"=>Sat, 01 Jan 2011,
+     "methodology"=>
+      "http://carbon.brighterplanet.com/automobiles.html?acquisition=2009-07-01&annual_distance_estimate=24140.2&fuel_efficiency=8.50287&fuel_type=R&key=3fca1403c1a561769a78ba462390ff01&make=Ford&size_class=Midsize+Pickup&timeframe=2010-01-01%2F2011-01-01",
+     "speed"=>50.9438793670604,
+     "emission_factor"=>2.48,
+     "emission"=>7040.88102017319,
+     "active_subtimeframe"=>
+      <Timeframe(-629293078) 365 days starting 2010-01-01 ending 2011-01-01>,
+     "make"=>
+      {"automobile_make"=>
+        {"name"=>"Ford",
+         "created_at"=>nil,
+         "fuel_efficiency_units"=>"kilometres_per_litre",
+         "updated_at"=>"2010-05-27T01:21:08Z",
+         "major"=>true,
+         "fuel_efficiency"=>10.1994}},
+     "fuel_consumed"=>2839.06492748919,
+     "urbanity"=>0.43,
+     "size_class"=>
+      {"automobile_size_class"=>
+        {"name"=>"Midsize Pickup",
+         "created_at"=>"2010-05-14T22:55:43Z",
+         "fuel_efficiency_city"=>6.8,
+         "fuel_efficiency_highway"=>8.97,
+         "annual_distance"=>20918.0,
+         "hybrid_fuel_efficiency_highway_multiplier"=>1.2,
+         "updated_at"=>"2010-05-14T22:55:44Z",
+         "fuel_efficiency_highway_units"=>"kilometres_per_litre",
+         "emblem"=>"",
+         "annual_distance_units"=>"kilometres",
+         "conventional_fuel_efficiency_city_multiplier"=>0.98,
+         "conventional_fuel_efficiency_highway_multiplier"=>0.99,
+         "hybrid_fuel_efficiency_city_multiplier"=>1.57,
+         "fuel_efficiency_city_units"=>"kilometres_per_litre"}},
+     "annual_distance_estimate"=>24140.2,
+     "reports"=>
+      [{"conclusion"=>7040.88102017319,
+        "committee"=>
+         {"name"=>"emission",
+          "quorums"=>
+           [{"name"=>"from fuel",
+             "process"=>{},
+             "supplements"=>["fuel_type"],
+             "compliance"=>[],
+             "requirements"=>["fuel_consumed", "emission_factor"]},
+            {"name"=>"default",
+             "process"=>{},
+             "supplements"=>[],
+             "compliance"=>[],
+             "requirements"=>[]}]},
+        "quorum"=>
+         {"name"=>"from fuel",
+          "process"=>{},
+          "supplements"=>["fuel_type"],
+          "compliance"=>[],
+          "requirements"=>["fuel_consumed", "emission_factor"]}},
+       {"conclusion"=>2.48,
+        "committee"=>
+         {"name"=>"emission_factor",
+          "quorums"=>
+           [{"name"=>"from fuel type",
+             "process"=>{},
+             "supplements"=>[],
+             "compliance"=>[],
+             "requirements"=>["fuel_type"]},
+            {"name"=>"default",
+             "process"=>{},
+             "supplements"=>[],
+             "compliance"=>[],
+             "requirements"=>[]}]},
+        "quorum"=>
+         {"name"=>"from fuel type",
+          "process"=>{},
+          "supplements"=>[],
+          "compliance"=>[],
+          "requirements"=>["fuel_type"]}},
+       {"conclusion"=>2839.06492748919,
+        "committee"=>
+         {"name"=>"fuel_consumed",
+          "quorums"=>
+           [{"name"=>"from adjusted fuel_efficiency and distance",
+             "process"=>{},
+             "supplements"=>[],
+             "compliance"=>[],
+             "requirements"=>["adjusted_fuel_efficiency", "distance"]}]},
+        "quorum"=>
+         {"name"=>"from adjusted fuel_efficiency and distance",
+          "process"=>{},
+          "supplements"=>[],
+          "compliance"=>[],
+          "requirements"=>["adjusted_fuel_efficiency", "distance"]}},
+       {"conclusion"=>24140.2,
+        "committee"=>
+         {"name"=>"distance",
+          "quorums"=>
+           [{"name"=>"from annual distance",
+             "process"=>{},
+             "supplements"=>[],
+             "compliance"=>[],
+             "requirements"=>["annual_distance", "active_subtimeframe"]}]},
+        "quorum"=>
+         {"name"=>"from annual distance",
+          "process"=>{},
+          "supplements"=>[],
+          "compliance"=>[],
+          "requirements"=>["annual_distance", "active_subtimeframe"]}},
+       {"conclusion"=>24140.2,
+        "committee"=>
+         {"name"=>"annual_distance",
+          "quorums"=>
+           [{"name"=>"from annual distance estimate",
+             "process"=>{},
+             "supplements"=>[],
+             "compliance"=>[],
+             "requirements"=>["annual_distance_estimate"]},
+            {"name"=>"from weekly distance estimate",
+             "process"=>{},
+             "supplements"=>[],
+             "compliance"=>[],
+             "requirements"=>["weekly_distance_estimate"]},
+            {"name"=>"from daily distance",
+             "process"=>{},
+             "supplements"=>[],
+             "compliance"=>[],
+             "requirements"=>["daily_distance"]},
+            {"name"=>"from size class",
+             "process"=>{},
+             "supplements"=>[],
+             "compliance"=>[],
+             "requirements"=>["size_class"]},
+            {"name"=>"from fuel type",
+             "process"=>{},
+             "supplements"=>[],
+             "compliance"=>[],
+             "requirements"=>["fuel_type"]},
+            {"name"=>"default",
+             "process"=>{},
+             "supplements"=>[],
+             "compliance"=>[],
+             "requirements"=>[]}]},
+        "quorum"=>
+         {"name"=>"from annual distance estimate",
+          "process"=>{},
+          "supplements"=>[],
+          "compliance"=>[],
+          "requirements"=>["annual_distance_estimate"]}},
+       {"conclusion"=>8.50287,
+        "committee"=>
+         {"name"=>"adjusted_fuel_efficiency",
+          "quorums"=>
+           [{"name"=>"from fuel efficiency",
+             "process"=>{},
+             "supplements"=>[],
+             "compliance"=>[],
+             "requirements"=>["fuel_efficiency"]},
+            {"name"=>"from variant",
+             "process"=>{},
+             "supplements"=>[],
+             "compliance"=>[],
+             "requirements"=>["variant", "urbanity"]},
+            {"name"=>"from nominal fuel efficiency and multiplier",
+             "process"=>{},
+             "supplements"=>[],
+             "compliance"=>[],
+             "requirements"=>
+              ["nominal_fuel_efficiency", "fuel_efficiency_multiplier"]}]},
+        "quorum"=>
+         {"name"=>"from fuel efficiency",
+          "process"=>{},
+          "supplements"=>[],
+          "compliance"=>[],
+          "requirements"=>["fuel_efficiency"]}},
+       {"conclusion"=>1.0,
+        "committee"=>
+         {"name"=>"fuel_efficiency_multiplier",
+          "quorums"=>
+           [{"name"=>"from_size_class_and_hybridity",
+             "process"=>{},
+             "supplements"=>[],
+             "compliance"=>[],
+             "requirements"=>["size_class", "hybridity", "urbanity"]},
+            {"name"=>"from hybridity",
+             "process"=>{},
+             "supplements"=>[],
+             "compliance"=>[],
+             "requirements"=>["hybridity", "urbanity"]},
+            {"name"=>"default",
+             "process"=>{},
+             "supplements"=>[],
+             "compliance"=>[],
+             "requirements"=>[]}]},
+        "quorum"=>
+         {"name"=>"default",
+          "process"=>{},
+          "supplements"=>[],
+          "compliance"=>[],
+          "requirements"=>[]}},
+       {"conclusion"=>7.88765178259689,
+        "committee"=>
+         {"name"=>"nominal_fuel_efficiency",
+          "quorums"=>
+           [{"name"=>"from model",
+             "process"=>{},
+             "supplements"=>[],
+             "compliance"=>[],
+             "requirements"=>["model", "urbanity"]},
+            {"name"=>"from make and model year",
+             "process"=>{},
+             "supplements"=>[],
+             "compliance"=>[],
+             "requirements"=>["model_year"]},
+            {"name"=>"from size class",
+             "process"=>{},
+             "supplements"=>[],
+             "compliance"=>[],
+             "requirements"=>["size_class", "urbanity"]},
+            {"name"=>"from model year",
+             "process"=>{},
+             "supplements"=>[],
+             "compliance"=>[],
+             "requirements"=>["model_year"]},
+            {"name"=>"from make",
+             "process"=>{},
+             "supplements"=>[],
+             "compliance"=>[],
+             "requirements"=>["make"]},
+            {"name"=>"default",
+             "process"=>{},
+             "supplements"=>[],
+             "compliance"=>[],
+             "requirements"=>[]}]},
+        "quorum"=>
+         {"name"=>"from size class",
+          "process"=>{},
+          "supplements"=>[],
+          "compliance"=>[],
+          "requirements"=>["size_class", "urbanity"]}},
+       {"conclusion"=>50.9438793670604,
+        "committee"=>
+         {"name"=>"speed",
+          "quorums"=>
+           [{"name"=>"from urbanity",
+             "process"=>{},
+             "supplements"=>[],
+             "compliance"=>[],
+             "requirements"=>["urbanity"]}]},
+        "quorum"=>
+         {"name"=>"from urbanity",
+          "process"=>{},
+          "supplements"=>[],
+          "compliance"=>[],
+          "requirements"=>["urbanity"]}},
+       {"conclusion"=>0.43,
+        "committee"=>
+         {"name"=>"urbanity",
+          "quorums"=>
+           [{"name"=>"default",
+             "process"=>{},
+             "supplements"=>[],
+             "compliance"=>[],
+             "requirements"=>[]}]},
+        "quorum"=>
+         {"name"=>"default",
+          "process"=>{},
+          "supplements"=>[],
+          "compliance"=>[],
+          "requirements"=>[]}},
+       {"conclusion"=>"2010-01-01/2011-01-01",
+        "committee"=>
+         {"name"=>"active_subtimeframe",
+          "quorums"=>
+           [{"name"=>"from acquisition and retirement",
+             "process"=>{},
+             "supplements"=>[],
+             "compliance"=>[],
+             "requirements"=>["acquisition", "retirement"]}]},
+        "quorum"=>
+         {"name"=>"from acquisition and retirement",
+          "process"=>{},
+          "supplements"=>[],
+          "compliance"=>[],
+          "requirements"=>["acquisition", "retirement"]}},
+       {"conclusion"=>Sat, 01 Jan 2011,
+        "committee"=>
+         {"name"=>"retirement",
+          "quorums"=>
+           [{"name"=>"from acquisition",
+             "process"=>{},
+             "supplements"=>["acquisition"],
+             "compliance"=>[],
+             "requirements"=>[]}]},
+        "quorum"=>
+         {"name"=>"from acquisition",
+          "process"=>{},
+          "supplements"=>["acquisition"],
+          "compliance"=>[],
+          "requirements"=>[]}}],
+     "fuel_efficiency"=>8.50287,
+     "distance"=>24140.2}
+
+An easier way to look is using the {JSONView add-on}[https://addons.mozilla.org/en-US/firefox/addon/10869/] for Firefox. Just take the methodology URL:
+
+    "methodology"=>
+     "http://carbon.brighterplanet.com/automobiles.html?acquisition=2009-07-01&annual_distance_estimate=24140.2&fuel_efficiency=8.50287&fuel_type=R&key=3fca1403c1a561769a78ba462390ff01&make=Ford&size_class=Midsize+Pickup&timeframe=2010-01-01%2F2011-01-01",
+
+...and say you want JSON instead of HTML...
+
+    http://carbon.brighterplanet.com/automobiles.html?acquisition=2009-07-01&annual_distance_estimate=24140.2&fuel_efficiency=8.50287&fuel_type=R&key=3fca1403c1a561769a78ba462390ff01&make=Ford&size_class=Midsize+Pickup&timeframe=2010-01-01%2F2011-01-01
+                                                   |
+                                              change this
+                                                   |
+    http://carbon.brighterplanet.com/automobiles.json?acquisition=2009-07-01&annual_distance_estimate=24140.2&fuel_efficiency=8.50287&fuel_type=R&key=3fca1403c1a561769a78ba462390ff01&make=Ford&size_class=Midsize+Pickup&timeframe=2010-01-01%2F2011-01-01
+
+...and look what we found!
+
+link:../doc/examining-response-with-jsonview.png
+
+As you can see, the byproducts (really the internal variables) of the calculation are sent along with the response. Your legacy app may never use these values, but we do! We clarified things with a few helper methods:
+
+    diff --git a/app/models/emitter.rb b/app/models/emitter.rb
+    index 93971b7..c5d5709 100644
+    --- a/app/models/emitter.rb
+    +++ b/app/models/emitter.rb
+    @@ -5,6 +5,35 @@ class Emitter < ActiveRecord::Base
+        respond_to? :emission_estimate
+      end
+
+    +  def real_or_assumed_characteristic_value(key)
+    +    return characteristics[key] if characteristics.has_key? key
+    +    if outsourced?
+    +      emission_estimate.response.data[key.to_s]
+    +    else
+    +      committee_reports[key]
+    +    end
+    +  end
+    +  
+    +  def assumed_characteristic_value?(key)
+    +    if outsourced?
+    +      emission_estimate.response.data.keys.include? key.to_s
+    +    else
+    +      committee_reports.keys.include? key
+    +    end
+    +  end
+    +
+    +  def reporting_committee_name(key)
+    +    if outsourced?
+    +      begin
+    +        emission_estimate.response.data['reports'].detect { |i| i['committee']['name'] == key.to_s }['quorum']['name']
+    +      rescue NoMethodError
+    +        # couldn't find it
+    +      end
+    +    else
+    +      self.class.characterization.committees[key].called_quorum.name
+    +    end.to_s.dasherize.downcase
+    +  end
+    +  
+      self.abstract_class = true
+
+      extend ActiveSupport::Memoizable if Switches.memoization?
+    @@ -54,6 +83,8 @@ class Emitter < ActiveRecord::Base
+          value = options[:value]
+        elsif characteristics.has_key?(name)
+          value = characteristics[name]
+    +    elsif outsourced? and emission_estimate.response.data.has_key? name.to_s
+    +      value = emission_estimate.response.data[name.to_s]
+        elsif committee_reports.has_key?(name)
+          value = committee_reports[name]
+        else
+    @@ -314,7 +345,7 @@ class Emitter < ActiveRecord::Base
+          timeframe.include? emission_date
+        elsif self.class.characterization.characteristics.include? :active_subtimeframe
+          if outsourced?
+    -        timeframe & emission_estimate(:timeframe => timeframe).active_subtimeframe
+    +        timeframe & emission_estimate(:timeframe => timeframe).response.data['active_subtimeframe']
+          else
+            timeframe & committee_reports[:active_subtimeframe]
+          end
+
+Then we brought the internal variables back to life:
+
+    diff --git a/app/helpers/emitters_helper.rb b/app/helpers/emitters_helper.rb
+    index c1b75ee..b5c3a1c 100755
+    --- a/app/helpers/emitters_helper.rb
+    +++ b/app/helpers/emitters_helper.rb
+    @@ -3,7 +3,7 @@
+ 
+     module EmittersHelper
+       def render_characteristic(emitter, characteristic)
+    -    characteristic_value = (emitter.outsourced? or emitter.characteristics.has_key?(characteristic)) ? emitter.characteristics[characteristic] : emitter.committee_reports[characteristic]
+    +    characteristic_value = emitter.real_or_assumed_characteristic_value(characteristic)
+         locals = { :emitter => emitter, :characteristic => characteristic, characteristic => characteristic_value }
+     
+         begin
+    @@ -14,7 +14,7 @@ module EmittersHelper
+       end
+   
+       def render_edit_characteristic(emitter, characteristic)
+    -    characteristic_value = (emitter.outsourced? or emitter.characteristics.has_key?(characteristic)) ? emitter.characteristics[characteristic] : emitter.committee_reports[characteristic]
+    +    characteristic_value = emitter.real_or_assumed_characteristic_value(characteristic)
+         locals = { :emitter => emitter, :characteristic => characteristic, characteristic => characteristic_value }
+         template = pick_edit_partial(emitter, characteristic)
+         if template == 'characteristics/controls/collection_select'
+    @@ -80,7 +80,7 @@ module EmittersHelper
+       end
+   
+       def render_placeholder_characteristic(emitter, characteristic)
+    -    characteristic_value = (emitter.outsourced? or emitter.characteristics.has_key?(characteristic)) ? emitter.characteristics[characteristic] : emitter.committee_reports[characteristic]
+    +    characteristic_value = emitter.real_or_assumed_characteristic_value(characteristic)
+         locals = { :emitter => emitter, :characteristic => characteristic, characteristic => characteristic_value }
+         render :partial => "#{emitter.common_plural}/#{characteristic}/placeholder", :layout => 'characteristics/layouts/placeholder', :locals => locals
+       rescue ActionView::MissingTemplate
+    diff --git a/app/views/characteristics/_characteristic.html.erb b/app/views/characteristics/_characteristic.html.erb
+    index c08003d..b9bb073 100644
+    --- a/app/views/characteristics/_characteristic.html.erb
+    +++ b/app/views/characteristics/_characteristic.html.erb
+    @@ -1,7 +1,7 @@
+     <%
+     known = !(known == false)
+     expanded = (expanded == true)
+    -reported = !emitter.outsourced? and emitter.committee_reports.keys.include? characteristic # this should never happen if known
+    +reported = emitter.assumed_characteristic_value? characteristic # this should never happen if known
+     element_class = [characteristic]
+     element_class << 'reported' if reported
+     element_class << 'next' if expanded
+    @@ -16,7 +16,7 @@ element_class = element_class.join ' '
+       <%= render_edit_characteristic emitter, characteristic if expanded %>
+       <%= render_help_for_characteristic(emitter.common_symbol, characteristic) if expanded %>
+       <% if reported %>
+    -    <span class="assumption">Assuming <%= render_characteristic emitter, characteristic %><span class="method"> via the <i><%= emitter.class.characterization.committees[characteristic].called_quorum.name.to_s.dasherize %></i> method</span></span>
+    +    <span class="assumption">Assuming <%= render_characteristic emitter, characteristic %><span class="method"> via the <i><%= emitter.reporting_committee_name(characteristic) %></i> method</span></span>
+       <% end %>
+     <% end %>
+     </dd>
+    diff --git a/app/views/components/_gaps.html.erb b/app/views/components/_gaps.html.erb
+    index 203d261..4e0fa04 100644
+    --- a/app/views/components/_gaps.html.erb
+    +++ b/app/views/components/_gaps.html.erb
+    @@ -1,5 +1,5 @@
+     <% if component.tense == :imperfect %>
+    -  <% covered_timeframes = component.emitters.values.flatten.collect { |e| e.outsourced? ? nil : e.committee_reports(timeframe)[:active_subtimeframe] } %>
+    +  <% covered_timeframes = component.emitters.values.flatten.collect { |e| e.real_or_assumed_characteristic_value :active_subtimeframe } %>
+       <% unless timeframe.covered_by? *covered_timeframes %>
+       <% gaps = timeframe.gaps_left_by(*covered_timeframes) %>
+       <p><strong>Note:</strong> you haven't told us about any <%= component.class.component_name %> emissions during <%= gaps.to_sentence %>. If you <%= component.verb[:past] %> <%= component.class.component_name.pluralize %> during these times, please tell us about it.</p>
+

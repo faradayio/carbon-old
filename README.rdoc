@@ -1,12 +1,14 @@
 = Carbon
 
-Carbon is a Ruby API wrapper for the {Brighter Planet emission estimate web service}[http://carbon.brighterplanet.com], which is located at http://carbon.brighterplanet.com.
-
-By querying the web service, it can estimate the carbon emissions of many real-life objects, such as cars and houses, based on particular attributes that they may have.
+Carbon is a Ruby API wrapper for the {Brighter Planet emission estimate web service}[http://carbon.brighterplanet.com], which is located at http://carbon.brighterplanet.com. By querying the web service, it can estimate the carbon emissions of many real-life objects, such as cars and houses, based on particular attributes that they may have.
 
 == Full documentation
 
 Give the quick start a try! Once you've exhausted that, read the {carbon gem RDoc}[http://rdoc.info/projects/brighterplanet/carbon] for more.
+
+== Real-life integration guide
+
+In addition to the quick start and full documentation, check out the {integration guide}[link:files/doc/INTEGRATION_GUIDE_rdoc.html]. It has code examples from our real-life migration followed by brief developer commentary.
 
 == Quick start
 
