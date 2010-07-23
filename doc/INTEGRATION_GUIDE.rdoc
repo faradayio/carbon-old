@@ -894,3 +894,152 @@ Then we brought the internal variables back to life:
        <% gaps = timeframe.gaps_left_by(*covered_timeframes) %>
        <p><strong>Note:</strong> you haven't told us about any <%= component.class.component_name %> emissions during <%= gaps.to_sentence %>. If you <%= component.verb[:past] %> <%= component.class.component_name.pluralize %> during these times, please tell us about it.</p>
 
+=== Comments on step 3
+
+* A lot of data comes back from the emission estimate web service. You can inspect it by grabbing the methodology URL and changing it to JSON.
+
+* We realized that the "perspective" argument was mostly for caching. We don't need it anymore because the expensive computations are outsourced!
+
+== Step 4: Prepare for network problems (NON-WORKING DRAFT)
+
+If you've decided that the data returned by the Brighter Planet emission estimate web service is sufficient for your needs, it's time to deal with network problems.
+
+link:../doc/timeout-error.png
+
+You don't want your application to go offline if there is a network problem between carbon middleware and you. Using the carbon gem, that means rescuing from exceptions.
+
+It's easy to fake a simple problem by adding this to <tt>/etc/hosts</tt>: (remember to take it out later)
+
+    10.0.22.22      carbon.brighterplanet.com
+
+Now everything will time out:
+
+    >> a = Automobile.find 710
+    => #<Automobile [...] >
+    >> a.emission_estimate.to_f
+    Errno::ETIMEDOUT: Connection timed out - connect(2)
+    	from /usr/lib/ruby/1.8/net/http.rb:560:in `initialize'
+    	from /usr/lib/ruby/1.8/net/http.rb:560:in `open'
+    	from /usr/lib/ruby/1.8/net/http.rb:560:in `connect'
+    	from /usr/lib/ruby/1.8/timeout.rb:53:in `timeout'
+    	from /usr/lib/ruby/1.8/timeout.rb:93:in `timeout'
+    	from /usr/lib/ruby/1.8/net/http.rb:560:in `connect'
+    	from /usr/lib/ruby/1.8/net/http.rb:553:in `do_start'
+    	from /usr/lib/ruby/1.8/net/http.rb:542:in `start'
+    	from /usr/lib/ruby/gems/1.8/gems/nap-0.4/lib/rest/request.rb:133:in `perform'
+    	from /usr/lib/ruby/gems/1.8/gems/carbon-0.2.4/lib/carbon/emission_estimate/response.rb:43:in `perform'
+    	from /usr/lib/ruby/gems/1.8/gems/carbon-0.2.4/lib/carbon/emission_estimate/response.rb:16:in `load_realtime_data'
+    	from /usr/lib/ruby/gems/1.8/gems/carbon-0.2.4/lib/carbon/emission_estimate/response.rb:11:in `send'
+    	from /usr/lib/ruby/gems/1.8/gems/carbon-0.2.4/lib/carbon/emission_estimate/response.rb:11:in `initialize'
+    	from /usr/lib/ruby/gems/1.8/gems/carbon-0.2.4/lib/carbon/emission_estimate.rb:66:in `new'
+    	from /usr/lib/ruby/gems/1.8/gems/carbon-0.2.4/lib/carbon/emission_estimate.rb:66:in `response'
+    	from /usr/lib/ruby/gems/1.8/gems/carbon-0.2.4/lib/carbon/emission_estimate.rb:41:in `method_missing'
+    	from (irb):5>> 
+
+Here's an idea:
+
+    diff --git a/app/helpers/emitters_helper.rb b/app/helpers/emitters_helper.rb
+    index b5c3a1c..6f9f907 100755
+    --- a/app/helpers/emitters_helper.rb
+    +++ b/app/helpers/emitters_helper.rb
+    @@ -2,6 +2,30 @@
+     # doc/partials_that_use_local_variables_named_after_characteristics.rb
+ 
+     module EmittersHelper
+    +  def outsourced_content(failsafe = '', &block)
+    +    capture(&block)
+    +  rescue ::SocketError, ::Timeout::Error, ::Errno::ETIMEDOUT, ::Errno::ENETUNREACH, ::Errno::ECONNRESET, ::Errno::ECONNREFUSED
+    +    # These are general network errors raised by Net::HTTP.
+    +    # Your internet connection might be down, or our servers might be down.
+    +    failsafe
+    +  rescue ::Carbon::RateLimited
+    +    # Realtime mode only.
+    +    # In order to prevent denial-of-service attacks, our servers rate limit requests.
+    +    # The gem will try up to three times to get an answer back from the server, waiting slightly longer each time.
+    +    # If you still get this exception, please contact us at staff@brighterplanet.com and we'll lift your rate.
+    +    failsafe
+    +  rescue ::Carbon::RealtimeEstimateFailed
+    +    # Realtime mode only.
+    +    # Our server returned a 4XX or 5XX error.
+    +    # Please contact us at staff@brighterplanet.com if you get these more than a couple times.
+    +    failsafe
+    +  rescue ::Carbon::QueueingFailed
+    +    # Async mode only.
+    +    # The gem connects directly to Amazon SQS in order to provide maximum throughput. If that service returns anything other than success, you get this exception.
+    +    # Please contact us at staff@brighterplanet.com if you see too many of these.
+    +    failsafe
+    +  end
+    +  
+       def render_characteristic(emitter, characteristic)
+         characteristic_value = emitter.real_or_assumed_characteristic_value(characteristic)
+         locals = { :emitter => emitter, :characteristic => characteristic, characteristic => characteristic_value }
+    diff --git a/app/views/carbon_offsets/_emitter.html.erb b/app/views/carbon_offsets/_emitter.html.erb
+    index d1471ac..f7c5453 100644
+    --- a/app/views/carbon_offsets/_emitter.html.erb
+    +++ b/app/views/carbon_offsets/_emitter.html.erb
+    @@ -1,3 +1,4 @@
+    +<% outsourced_content do %>
+     <%
+     emission = if emitter.outsourced?
+       emitter.emission_estimate(:timeframe => timeframe).to_f
+    @@ -25,3 +26,4 @@ custom_package = {
+     <% if show_granting and admin? -%>
+       <p class="footprint offset"><%= link_to "Grant offsets for <span class=\"emitter_name\"> #{emitter.name}</span>", grant_custom_packages_url(:beneficiary_id => emitter.profile.user.andand.id, :custom_package => custom_package), :class => 'with_icon cart', :method => :post %> <span class="magnitude"><%= emission.kilograms.to(:tons).adaptive_round(1) %> tons / free</span></p>
+     <% end -%>
+    +<% end %>
+    \ No newline at end of file
+    diff --git a/app/views/characteristics/_characteristic.html.erb b/app/views/characteristics/_characteristic.html.erb
+    index b9bb073..5e8b77a 100644
+    --- a/app/views/characteristics/_characteristic.html.erb
+    +++ b/app/views/characteristics/_characteristic.html.erb
+    @@ -1,3 +1,4 @@
+    +<% outsourced_content do %>
+     <%
+     known = !(known == false)
+     expanded = (expanded == true)
+    @@ -20,3 +21,4 @@ element_class = element_class.join ' '
+       <% end %>
+     <% end %>
+     </dd>
+    +<% end %>
+    \ No newline at end of file
+    diff --git a/app/views/emissions/_footprint.html.erb b/app/views/emissions/_footprint.html.erb
+    index cbb9011..4f4df54 100644
+    --- a/app/views/emissions/_footprint.html.erb
+    +++ b/app/views/emissions/_footprint.html.erb
+    @@ -5,9 +5,18 @@
+         <%= render :partial => "#{footprintable.common_plural}/footprint", :locals => { :emitter => footprintable, :timeframe => timeframe } %>
+       <% end %>
+   
+    -  <span class="footprint"><span class="number"><%= ((footprintable.is_a?(Emitter) and footprintable.outsourced?) ? footprintable.emission_estimate(:timeframe => timeframe) : footprintable.emission(timeframe)).to_f.kilograms.to(:tons).adaptive_round %></span> tons CO<sub>2</sub></span>
+    +  <span class="footprint">
+    +    <span class="number">
+    +      <% outsourced_content do %>
+    +      <%= ((footprintable.is_a?(Emitter) and footprintable.outsourced?) ? footprintable.emission_estimate(:timeframe => timeframe) : footprintable.emission(timeframe)).to_f.kilograms.to(:tons).adaptive_round %>
+    +      <% end %>
+    +    </span>
+    +    tons CO<sub>2</sub>
+    +  </span>
+   
+    -  <%= render :partial => 'emissions/extraneous', :locals => { :timeframe => timeframe } if footprintable.is_a?(Emitter) and !footprintable.emitted_during_timeframe?(timeframe) %>
+    +  <% outsourced_content do %>
+    +    <%= render :partial => 'emissions/extraneous', :locals => { :timeframe => timeframe } if footprintable.is_a?(Emitter) and !footprintable.emitted_during_timeframe?(timeframe) %>
+    +  <% end %>
+   
+       <%#= render :partial => 'emissions/confidence', :locals => { :footprintable => footprintable } %>
+   
+    diff --git a/app/views/emitters/_sidebar.html.erb b/app/views/emitters/_sidebar.html.erb
+    index 2da2214..9190387 100644
+    --- a/app/views/emitters/_sidebar.html.erb
+    +++ b/app/views/emitters/_sidebar.html.erb
+    @@ -6,7 +6,9 @@
+         <%= render :partial => 'carbon_offsets/emitter', :locals => { :emitter => emitter, :timeframe => timeframe, :show_purchasing => true, :show_granting => true } %>
+     <% if emitter.outsourced? %>
+         <p class="committee_reports">
+    -      <%= link_to 'Show calculation methods', emitter.emission_estimate.methodology %>
+    +      <% outsourced_content do %>
+    +        <%= link_to 'Show calculation methods', emitter.emission_estimate.methodology %>
+    +      <% end %>
+         </p>
+     <% else %>
+         <p class="committee_reports">
