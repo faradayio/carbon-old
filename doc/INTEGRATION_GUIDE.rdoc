@@ -954,16 +954,18 @@ Here's an idea:
      <% else %>
          <p class="committee_reports">
     diff --git a/app/helpers/emitters_helper.rb b/app/helpers/emitters_helper.rb
-    index b5c3a1c..a0921b2 100755
+    index c1b75ee..bd0c78f 100755
     --- a/app/helpers/emitters_helper.rb
     +++ b/app/helpers/emitters_helper.rb
-    @@ -2,6 +2,39 @@
+    @@ -2,8 +2,47 @@
     # doc/partials_that_use_local_variables_named_after_characteristics.rb
 
     module EmittersHelper
     +  def outsourced_content(failsafe = '', &block)
-    +    str = @failed ? failsafe : capture(&block)
+    +    failed = request.instance_variable_get :@outsourced_request_failed
+    +    str = failed ? failsafe : capture(&block)
     +    if block_called_from_erb? block
+    +      # sabshere 7/28/10 use of #concat is specific to Rails 2, I believe
     +      concat str
     +    else
     +      str
@@ -971,26 +973,25 @@ Here's an idea:
     +  rescue ::SocketError, ::Timeout::Error, ::Errno::ETIMEDOUT, ::Errno::ENETUNREACH, ::Errno::ECONNRESET, ::Errno::ECONNREFUSED
     +    # These are general network errors raised by Net::HTTP.
     +    # Your internet connection might be down, or our servers might be down.
-    +    @failed = true
+    +    request.instance_variable_set :@outsourced_request_failed, true
     +    retry
     +  rescue ::Carbon::RateLimited
     +    # Realtime mode only.
     +    # In order to prevent denial-of-service attacks, our servers rate limit requests.
     +    # The gem will try up to three times to get an answer back from the server, waiting slightly longer each time.
     +    # If you still get this exception, please contact us at staff@brighterplanet.com and we'll lift your rate.
-    +    @failed = true
+    +    request.instance_variable_set :@outsourced_request_failed, true
     +    retry
     +  rescue ::Carbon::RealtimeEstimateFailed
     +    # Realtime mode only.
     +    # Our server returned a 4XX or 5XX error.
     +    # Please contact us at staff@brighterplanet.com if you get these more than a couple times.
-    +    @failed = true
     +    retry
     +  rescue ::Carbon::QueueingFailed
     +    # Async mode only.
     +    # The gem connects directly to Amazon SQS in order to provide maximum throughput. If that service returns anything other than success, you get this exception.
     +    # Please contact us at staff@brighterplanet.com if you see too many of these.
-    +    @failed = true
+    +    request.instance_variable_set :@outsourced_request_failed, true
     +    retry
     +  end
 
