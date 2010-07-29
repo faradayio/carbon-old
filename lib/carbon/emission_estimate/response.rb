@@ -12,15 +12,19 @@ module Carbon
       def load_realtime_data # :nodoc:
         attempts = 0
         begin
-          response = perform
+          ::SystemTimer.timeout_after(2) do
+            response = perform
+          end
           raise ::Carbon::RateLimited if response.status_code == 403 and response.body =~ /Rate Limit/i
+        rescue ::Timeout::Error
+          raise ::Carbon::SlowResponse
         rescue ::Carbon::RateLimited
           if attempts < 4
             attempts += 1
             sleep 0.2 * attempts
             retry
           else
-            raise $!, "Rate limited #{attempts} time(s) in a row"
+            raise $!
           end
         end
         raise ::Carbon::RealtimeEstimateFailed unless response.success?

@@ -13,6 +13,7 @@ begin
     gemspec.add_dependency 'activesupport', '>=2.3.5'
     gemspec.add_dependency 'nap', '>=0.4'
     gemspec.add_dependency 'timeframe', '>=0.0.7'
+    gemspec.add_dependency 'system_timer', '>=1.0'
     gemspec.add_dependency 'blockenspiel', '>=0.3.2'
 
     gemspec.add_development_dependency 'fakeweb', '>=1.2.8'

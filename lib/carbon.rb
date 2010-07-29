@@ -1,4 +1,5 @@
 require 'uri'
+require 'system_timer'
 require 'blockenspiel'
 require 'rest' # provided by nap gem
 require 'timeframe'
