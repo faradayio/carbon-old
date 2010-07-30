@@ -2,6 +2,7 @@ require 'uri'
 require 'blockenspiel'
 require 'rest' # provided by nap gem
 require 'timeframe'
+require 'digest/sha1'
 require 'active_support/version'
 %w{
   active_support/core_ext/module/attribute_accessors
@@ -44,6 +45,7 @@ module Carbon
   
   REALTIME_URL = 'http://carbon.brighterplanet.com'
   ASYNC_URL = 'https://queue.amazonaws.com/121562143717/cm1_production_incoming'
+  STORAGE_URL = 'http://storage.carbon.brighterplanet.com'
   
   class RealtimeEstimateFailed < RuntimeError # :nodoc:
   end

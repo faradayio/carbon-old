@@ -3,7 +3,6 @@ module Carbon
     class Response
       attr_reader :parent
       attr_reader :data
-      attr_reader :number
       attr_reader :raw_request
       attr_reader :raw_response
       def initialize(parent)
@@ -25,22 +24,16 @@ module Carbon
           end
         end
         raise ::Carbon::RealtimeEstimateFailed unless response.success?
-        @data = ::ActiveSupport::JSON.decode response.body
-        instantiate_known_response_objects
-        @number = data['emission'].to_f.freeze
-      end
-      def instantiate_known_response_objects # :nodoc:
-        data['active_subtimeframe'] = ::Timeframe.interval(data['active_subtimeframe']) if data.has_key? 'active_subtimeframe'
+        @data = ::Carbon::EmissionEstimate.parse response.body
       end
       def load_async_data # :nodoc:
         response = perform
         raise ::Carbon::QueueingFailed unless response.success?
         @data = {}
-        @number = nil
       end
       def perform # :nodoc:
         @raw_request = ::REST::Request.new :post, ::URI.parse(parent.request.url), parent.request.body, {'Content-Type' => 'application/x-www-form-urlencoded; charset=utf-8'}
-        @raw_response = @raw_request.perform
+        @raw_response = raw_request.perform
       end
     end
   end

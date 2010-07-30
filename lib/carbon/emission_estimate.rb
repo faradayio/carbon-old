@@ -1,5 +1,6 @@
 require 'carbon/emission_estimate/response'
 require 'carbon/emission_estimate/request'
+require 'carbon/emission_estimate/storage'
 
 module Carbon
   # Let's start off by saying that realtime <tt>EmissionEstimate</tt> objects quack like numbers.
@@ -10,11 +11,18 @@ module Carbon
   #
   # At the same time, they contain all the data you get back from the emission estimate web service. For example, you could say <tt>puts my_donut_factor.emission_estimate.oven_count</tt> (see the tests) and you'd get back the oven count used in the calculation, if any.
   class EmissionEstimate
+    def self.parse(str)
+      data = ::ActiveSupport::JSON.decode str
+      data['active_subtimeframe'] = ::Timeframe.interval(data['active_subtimeframe']) if data.has_key? 'active_subtimeframe'
+      data['updated_at'] = ::Time.parse(data['updated_at']) if data.has_key? 'updated_at'
+      data
+    end
+    
     def initialize(emitter)
       @emitter = emitter
     end
     
-    VALID_OPTIONS = [:callback_content_type, :key, :callback, :timeframe]
+    VALID_OPTIONS = [:callback_content_type, :key, :callback, :timeframe, :guid]
     def take_options(options)
       return if options.blank?
       options.slice(*VALID_OPTIONS).each do |k, v|
@@ -25,7 +33,7 @@ module Carbon
     # I can be compared directly to a number, unless I'm an async request.
     def ==(other)
       if other.is_a? ::Numeric and mode == :realtime
-        other == response.number
+        other == number
       else
         super
       end
@@ -38,23 +46,33 @@ module Carbon
     #   > my_car.emission_estimate.model
     #   => 'Ford Taurus'
     def method_missing(method_id, *args, &blk)
-      if !block_given? and args.empty? and response.data.has_key? method_id.to_s
-        response.data[method_id.to_s]
+      if !block_given? and args.empty? and data.has_key? method_id.to_s
+        data[method_id.to_s]
       elsif ::Float.method_defined? method_id
         raise TriedToUseAsyncResponseAsNumber if mode == :async
-        response.number.send method_id, *args, &blk
+        number.send method_id, *args, &blk
       else
         super
       end
     end
-
     attr_writer :callback_content_type
     attr_writer :key
-
     attr_accessor :callback
     attr_accessor :timeframe
-    
+    attr_accessor :guid
     attr_reader :emitter
+    def data
+      if storage.present?
+        storage.data
+      else
+        response.data
+      end
+    end
+    def storage
+      @storage ||= {}
+      return @storage[guid] if @storage.has_key? guid
+      @storage[guid] = Storage.new self
+    end
     def request
       @request ||= Request.new self
     end
@@ -65,8 +83,14 @@ module Carbon
       return @response[current_params] if @response.has_key? current_params
       @response[current_params] = Response.new self
     end
+    def number
+      async? ? nil : data['emission'].to_f.freeze
+    end
+    def async?
+      callback
+    end
     def mode
-      callback ? :async : :realtime
+      async? ? :async : :realtime
     end
     def callback_content_type
       @callback_content_type || 'application/json'
@@ -76,27 +100,27 @@ module Carbon
     end
     # The timeframe being looked at in the emission calculation.
     def active_subtimeframe
-      response.data['active_subtimeframe']
+      data['active_subtimeframe']
     end
     # Another way to access the emission value.
     # Useful if you don't like treating <tt>EmissionEstimate</tt> objects like <tt>Numeric</tt> objects (even though they do quack like numbers...)
     def emission_value
-      response.number
+      number
     end
     # The units of the emission.
     def emission_units
-      response.data['emission_units']
+      data['emission_units']
     end
     # Errors (and warnings) as reported in the response.
     # Note: may contain HTML tags like KBD or A
     def errors
-      response.data['errors']
+      data['errors']
     end
     # The URL of the methodology report indicating how this estimate was calculated.
     #   > my_car.emission_estimate.methodology
     #   => 'http://carbon.brighterplanet.com/automobiles.html?[...]'
     def methodology
-      response.data['methodology']
+      data['methodology']
     end
   end
 end

@@ -1,6 +1,85 @@
 require 'spec_helper'
+require 'active_support/json/encoding'
+require 'fakeweb'
 
 CALLBACK_URL = 'http://www.postbin.org/1dj0146'
+KEY = 'valid'
+EXISTING_UNIQUE_ID = 'oisjoaioijodijaosijdoias'
+MISSING_UNIQUE_ID = 'd09joijdoijaloijdoais'
+OTHER_UNIQUE_ID = '1092fjoid;oijsao;ga'
+
+FakeWeb.register_uri  :post,
+                      /carbon.brighterplanet.com.automobiles/,
+                      :status => ["200", "OK"],
+                      :body => {
+                        'emission' => '134.599',
+                        'emission_units' => 'kilograms',
+                        'methodology' => 'http://carbon.brighterplanet.com/something',
+                        'active_subtimeframe' => Timeframe.new(:year => 2008)
+                      }.to_json
+#
+FakeWeb.register_uri  :post,
+                      /carbon.brighterplanet.com.factories/,
+                      :status => ["200", "OK"],
+                      :body => {
+                        'emission' => 1000.0,
+                        'emission_units' => 'kilograms',
+                        'methodology' => 'http://carbon.brighterplanet.com/something',
+                        'active_subtimeframe' => Timeframe.new(:year => 2008)
+                      }.to_json
+#
+FakeWeb.register_uri  :post,
+                      /queue.amazonaws.com/,
+                      :status => ["200", "OK"],
+                      :body => 'You would see an amazon aws response'
+# yep, it's stored!
+FakeWeb.register_uri  :get,
+                      "http://storage.carbon.brighterplanet.com/#{Digest::SHA1.hexdigest(KEY+EXISTING_UNIQUE_ID)}",
+                      :status => ["200", "OK"],
+                      :body => {
+                        'emission' => 1234,
+                        'emission_units' => 'kilograms',
+                        'methodology' => 'http://carbon.brighterplanet.com/something',
+                        'updated_at' => Time.now.as_json
+                      }.to_json
+#
+FakeWeb.register_uri  :get,
+                      "http://storage.carbon.brighterplanet.com/#{Digest::SHA1.hexdigest(KEY+OTHER_UNIQUE_ID)}",
+                      :status => ["200", "OK"],
+                      :body => {
+                        'emission' => 99982,
+                        'emission_units' => 'kilograms',
+                        'methodology' => 'http://carbon.brighterplanet.com/something',
+                        'updated_at' => Time.now.as_json
+                      }.to_json
+#
+FakeWeb.register_uri  :get,
+                      "http://storage.carbon.brighterplanet.com/#{Digest::SHA1.hexdigest(KEY+MISSING_UNIQUE_ID)}",
+                      [
+                        {
+                          :status => ["404", "Not Found"],
+                          :body => "It's not here, you better ask carbon for it!"
+                        },
+                        {
+                          :status => ["200", "OK"],
+                          :body => {
+                            'emission' => 9876,
+                            'emission_units' => 'kilograms',
+                            'methodology' => 'http://carbon.brighterplanet.com/something',
+                            'updated_at' => Time.now.as_json
+                          }.to_json
+                        }
+                      ]
+#
+# FakeWeb.register_uri  :post,
+#                       /carbon.brighterplanet.com.*#{MISSING_UNIQUE_ID}/,
+#                       :status => ["302", "Moved Permanently"],
+#                       :body => {
+#                         'emission' => 9876,
+#                         'emission_units' => 'kilograms',
+#                         'methodology' => 'http://carbon.brighterplanet.com/something'
+#                       }.to_json,
+#                       :headers => { 'Location' => "http://storage.carbon.brighterplanet.com/#{Digest::SHA1.hexdigest(KEY+MISSING_UNIQUE_ID)}" }
 
 class RentalCar
   include Carbon
@@ -47,7 +126,7 @@ end
 
 describe Carbon do
   before(:each) do
-    Carbon.key = 'valid'
+    Carbon.key = KEY
   end
   
   it 'should be simple to use' do
@@ -104,6 +183,31 @@ describe Carbon do
     end
   end
   
+  describe 'requests that can be stored (cached) by guid' do
+    it 'should find existing unique ids on S3' do
+      d = DonutFactory.new
+      d.emission_estimate(:guid => EXISTING_UNIQUE_ID).should == 1234
+      d.emission_estimate(:guid => EXISTING_UNIQUE_ID).updated_at.should be_instance_of(Time)
+    end
+    it "should pass through to realtime if unique id isn't found on S3" do
+      d = DonutFactory.new
+      d.emission_estimate(:guid => MISSING_UNIQUE_ID).should == 1000
+      d.emission_estimate(:guid => MISSING_UNIQUE_ID).response.data.keys.should_not include('updated_at')
+      d1 = DonutFactory.new
+      d1.emission_estimate(:guid => MISSING_UNIQUE_ID).should == 9876
+      d1.emission_estimate(:guid => MISSING_UNIQUE_ID).updated_at.should be_instance_of(Time)
+    end
+    it "should depend on the user to update the guid if they want a new estimate" do
+      d = DonutFactory.new
+      d.oven_count = 12_000
+      str1 = d.emission_estimate(:guid => EXISTING_UNIQUE_ID).methodology
+      str1.should equal(d.emission_estimate(:guid => EXISTING_UNIQUE_ID).methodology)
+      d.oven_count = 13_000
+      str1.should equal(d.emission_estimate(:guid => EXISTING_UNIQUE_ID).methodology)
+      str1.should_not equal(d.emission_estimate(:guid => OTHER_UNIQUE_ID).methodology)
+    end
+  end
+  
   describe 'synchronous (realtime) requests' do
     it 'should send simple params' do
       d = DonutFactory.new
@@ -138,7 +242,7 @@ describe Carbon do
     it 'should override defaults' do
       d = DonutFactory.new
       key = 'ADifferentOne'
-      d.emission_estimate.key.should == 'valid'
+      d.emission_estimate.key.should == KEY
       d.emission_estimate.key = key
       d.emission_estimate.key.should == key
     end
