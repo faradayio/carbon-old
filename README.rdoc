@@ -77,11 +77,40 @@ Let's say <tt>RentalCar#make</tt> returns a <tt>Make</tt> object. You should def
 
 == A note on asynchronous queries
 
-To request an emission estimate asynchronously, simply pass an URL as the <tt>:callback</tt> option to <tt>#emission_estimate</tt>:
+To specify that the result of a query should be POSTed back to you, simply pass an URL as the <tt>:callback</tt> option to <tt>#emission_estimate</tt>:
 
-    > RentalCar.new.emission_estimate :callback => http://example.com/my/callback/handler
+    > RentalCar.new.emission_estimate :callback => 'http://example.com/my/callback/handler'
 
 A good way to test this is to set up a {PostBin}[http://postbin.org].
+
+You can specify that the result be stored on S3 so that future identical requests can use the same estimate:
+
+    > RentalCar.new.emission_estimate :guid => 'A_GLOBALLY_UNIQUE_IDENTIFIER_FOR_THIS_EMISSION_ESTIMATE'
+
+You might think of <tt>:guid</tt> as a hash key or a cache key, but it is not necessarily unique to the emitter object... rather it should identify the particular set of characteristics on that emitter. That way other emitters, if they have the same characteristics, can use the same estimate.
+
+If you combine <tt>:guid</tt> and <tt>:defer => true</tt>, you have an easy, cheap 2-pass reporting system:
+
+    # pass 1: cron job runs a whole bunch of these
+    > car51.emission_estimate :guid => '[...]', :defer => true
+    > car52.emission_estimate :guid => '[...]', :defer => true
+    > car96.emission_estimate :guid => '[...]', :defer => true
+    
+    # pass 2: a while later, cron job runs these
+    > car51.emission_estimate :guid => '[...]'
+    > car52.emission_estimate :guid => '[...]'
+    > car96.emission_estimate :guid => '[...]'
+
+Most of these will be pre-calculated by the time you run pass #2. If any of them aren't done processing yet, it will revert to a real-time estimate... no big deal!
+
+== Possible combinations
+
+* () Runs a normal realtime request.
+* (timeout) Runs a realtime request but allows timing out the network call. Raises <tt>Timeout::Error</tt> if timeout is exceeded.
+* (guid) Runs a realtime request, but first checks if there is a result pre-calculated on S3. Stores result to S3 if there isn't.
+* (callback) Runs an async request (so you don't immediately get the result back). The result will be POSTed to the URL you specify.
+* (guid,defer) Runs an async request (so you don't immediately get the result back). The result will be stored to S3 as {http://storage.carbon.brighterplanet.com/SHA1-hexdigest-of-key+guid}[http://storage.carbon.brighterplanet.com/SHA1-hexdigest-of-key+guid]
+* (guid,timeout) (NOT IMPLEMENTED) A hybrid "best effort" request that is as cheap as an async request but will try to return the full result data immediately. It keeps trying S3 until your timeout is exceeded, at which point it's just a normal async request.
 
 == A note on exceptions
 
