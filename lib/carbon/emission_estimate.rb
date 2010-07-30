@@ -94,9 +94,9 @@ module Carbon
     def mode
       async? ? :async : :realtime
     end
-    # Timeout on realtime requests in seconds. Defaults to 2 seconds.
+    # Timeout on realtime requests in seconds, if desired.
     def timeout
-      @timeout || 2
+      @timeout
     end
     def callback_content_type
       @callback_content_type || 'application/json'

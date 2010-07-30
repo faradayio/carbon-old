@@ -13,9 +13,7 @@ module Carbon
         attempts = 0
         response = nil
         begin
-          ::SystemTimer.timeout_after(parent.timeout, ::Carbon::SlowResponse) do
-            response = perform
-          end
+          response = perform
           raise ::Carbon::RateLimited if response.status_code == 403 and response.body =~ /Rate Limit/i
         rescue ::Carbon::RateLimited
           if attempts < 4
@@ -35,6 +33,17 @@ module Carbon
         @data = {}
       end
       def perform # :nodoc:
+        response = nil
+        if parent.timeout
+          ::SystemTimer.timeout_after(parent.timeout) do
+            response = _perform
+          end
+        else
+          response = _perform
+        end
+        response
+      end
+      def _perform # :nodoc:
         @raw_request = ::REST::Request.new :post, ::URI.parse(parent.request.url), parent.request.body, {'Content-Type' => 'application/x-www-form-urlencoded; charset=utf-8'}
         @raw_response = raw_request.perform
       end

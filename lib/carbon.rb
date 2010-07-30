@@ -57,8 +57,6 @@ module Carbon
   end
   class TriedToUseAsyncResponseAsNumber < RuntimeError # :nodoc:
   end
-  class SlowResponse < RuntimeError # :nodoc:
-  end
 
   # The api key obtained from http://keys.brighterplanet.com
   mattr_accessor :key

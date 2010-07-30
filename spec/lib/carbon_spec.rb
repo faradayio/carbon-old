@@ -130,11 +130,11 @@ module Carbon
     attr_accessor :sleep_before_performing
     VALID_OPTIONS.push :sleep_before_performing
     class Response
-      def perform_with_delay
+      def _perform_with_delay
         sleep parent.sleep_before_performing if parent.sleep_before_performing
-        perform_without_delay
+        _perform_without_delay
       end
-      alias_method_chain :perform, :delay
+      alias_method_chain :_perform, :delay
     end
   end
 end
@@ -287,7 +287,7 @@ describe Carbon do
       d = DonutFactory.new
       lambda {
         d.emission_estimate(:sleep_before_performing => 2, :timeout => 1).to_f
-      }.should raise_error(::Carbon::SlowResponse)
+      }.should raise_error(::Timeout::Error)
     end
   
     it 'should accept timeframes' do
