@@ -22,7 +22,7 @@ module Carbon
       @emitter = emitter
     end
     
-    VALID_OPTIONS = [:callback_content_type, :key, :callback, :timeframe, :guid, :timeout]
+    VALID_OPTIONS = [:callback_content_type, :key, :callback, :timeframe, :guid, :timeout, :defer]
     def take_options(options)
       return if options.blank?
       options.slice(*VALID_OPTIONS).each do |k, v|
@@ -58,6 +58,7 @@ module Carbon
     attr_writer :callback_content_type
     attr_writer :key
     attr_writer :timeout
+    attr_writer :defer
     attr_accessor :callback
     attr_accessor :timeframe
     attr_accessor :guid
@@ -84,11 +85,11 @@ module Carbon
       return @response[current_params] if @response.has_key? current_params
       @response[current_params] = Response.new self
     end
-    def number
-      async? ? nil : data['emission'].to_f.freeze
+    def defer?
+      @defer == true
     end
     def async?
-      callback
+      callback or defer?
     end
     def mode
       async? ? :async : :realtime
@@ -109,8 +110,8 @@ module Carbon
     end
     # Another way to access the emission value.
     # Useful if you don't like treating <tt>EmissionEstimate</tt> objects like <tt>Numeric</tt> objects (even though they do quack like numbers...)
-    def emission_value
-      number
+    def number
+      async? ? nil : data['emission'].to_f.freeze
     end
     # The units of the emission.
     def emission_units

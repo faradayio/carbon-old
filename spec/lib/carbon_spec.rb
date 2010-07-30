@@ -221,6 +221,27 @@ describe Carbon do
       str1.should equal(d.emission_estimate(:guid => EXISTING_UNIQUE_ID).methodology)
       str1.should_not equal(d.emission_estimate(:guid => OTHER_UNIQUE_ID).methodology)
     end
+    it 'should be deferrable for use in 2-pass reporting systems' do
+      d = DonutFactory.new
+      d.emission_estimate(:guid => EXISTING_UNIQUE_ID, :defer => true).number.should be_nil
+      d.emission_estimate(:guid => EXISTING_UNIQUE_ID, :defer => true).request.url.should =~ /amazonaws/
+    end
+    it 'should complain if you provide defer but not guid' do
+      d = DonutFactory.new
+      lambda {
+        d.emission_estimate(:defer => true).request.params
+      }.should raise_error(ArgumentError, /defer.*guid/i)
+    end
+    it 'should complain if you provide guid and callback' do
+      d = DonutFactory.new
+      lambda {
+        d.emission_estimate(:defer => true, :callback => 'foobar').request.params
+      }.should raise_error(ArgumentError, /callback.*defer/i)
+    end
+    it 'should send guid along with other parameters when queueing up deferred request' do
+      d = DonutFactory.new
+      d.emission_estimate(:guid => EXISTING_UNIQUE_ID, :defer => true).request.params[:MessageBody].should =~ /#{EXISTING_UNIQUE_ID.to_query(:guid)}/
+    end
   end
   
   describe 'synchronous (realtime) requests' do
@@ -306,7 +327,7 @@ describe Carbon do
     it 'should have nil data in its response' do
       c = RentalCar.new
       c.emission_estimate.callback = CALLBACK_URL
-      c.emission_estimate.emission_value.should be_nil
+      c.emission_estimate.number.should be_nil
       c.emission_estimate.emission_units.should be_nil
       c.emission_estimate.methodology.should be_nil
     end

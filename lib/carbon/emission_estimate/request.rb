@@ -12,10 +12,13 @@ module Carbon
         send "#{parent.mode}_params"
       end
       def async_params # :nodoc:
+        raise ::ArgumentError, "When using :callback you cannot specify :defer" if parent.defer? and parent.callback
+        raise ::ArgumentError, "When using :defer => true you must specify :guid" if parent.defer? and parent.guid.blank?
         hash = _params
         hash[:emitter] = parent.emitter.class.carbon_base.emitter_common_name
-        hash[:callback] = parent.callback
-        hash[:callback_content_type] = parent.callback_content_type
+        hash[:callback] = parent.callback if parent.callback
+        hash[:callback_content_type] = parent.callback_content_type if parent.callback
+        hash[:guid] = parent.guid if parent.defer?
         {
           :Action => 'SendMessage',
           :Version => '2009-02-01',
