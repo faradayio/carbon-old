@@ -67,7 +67,7 @@ You should get an API key from http://keys.brighterplanet.com and set it globall
 
 Now all of your queries will use that key.
 
-== A note on <tt>#to_param</tt>
+== A note on <tt>#to_characteristic</tt> and <tt>#to_param</tt>
 
 Once you understand how to map attributes using the DSL, you might still be confused about what the gem actually calls on your objects.
 
