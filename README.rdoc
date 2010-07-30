@@ -109,7 +109,7 @@ Most of these will be pre-calculated by the time you run pass #2. If any of them
 * (timeout) Runs a realtime request but allows timing out the network call. Raises <tt>Timeout::Error</tt> if timeout is exceeded.
 * (guid) Runs a realtime request, but first checks if there is a result pre-calculated on S3. Stores result to S3 if there isn't.
 * (callback) Runs an async request (so you don't immediately get the result back). The result will be POSTed to the URL you specify.
-* (guid,defer) Runs an async request (so you don't immediately get the result back). The result will be stored to S3 as {http://storage.carbon.brighterplanet.com/SHA1-hexdigest-of-key+guid}[http://storage.carbon.brighterplanet.com/SHA1-hexdigest-of-key+guid]
+* (guid,defer) Runs an async request (so you don't immediately get the result back). The result will be stored to S3 as <tt>hxxp://storage.carbon.brighterplanet.com/SHA1-hexdigest-of-key+guid</tt>
 * (guid,timeout) (NOT IMPLEMENTED) A hybrid "best effort" request that is as cheap as an async request but will try to return the full result data immediately. It keeps trying S3 until your timeout is exceeded, at which point it's just a normal async request.
 
 == A note on exceptions
