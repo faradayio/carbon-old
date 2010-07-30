@@ -124,6 +124,21 @@ class DonutFactory
   end
 end
 
+# set up timeouts
+module Carbon
+  class EmissionEstimate
+    attr_accessor :sleep_before_performing
+    VALID_OPTIONS.push :sleep_before_performing
+    class Response
+      def perform_with_delay
+        sleep parent.sleep_before_performing if parent.sleep_before_performing
+        perform_without_delay
+      end
+      alias_method_chain :perform, :delay
+    end
+  end
+end
+
 describe Carbon do
   before(:each) do
     Carbon.key = KEY
@@ -245,6 +260,13 @@ describe Carbon do
       d.emission_estimate.key.should == KEY
       d.emission_estimate.key = key
       d.emission_estimate.key.should == key
+    end
+    
+    it 'should accept timeouts' do
+      d = DonutFactory.new
+      lambda {
+        d.emission_estimate(:sleep_before_performing => 2, :timeout => 1).to_f
+      }.should raise_error(::Carbon::SlowResponse)
     end
   
     it 'should accept timeframes' do

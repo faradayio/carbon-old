@@ -1,9 +1,10 @@
 require 'uri'
-require 'system_timer'
 require 'blockenspiel'
-require 'rest' # provided by nap gem
 require 'timeframe'
 require 'digest/sha1'
+require 'rest'    # provided by nap gem
+gem 'SystemTimer' # >=1.2, so as not to be confused with system_timer 1.0
+require 'system_timer'
 require 'active_support/version'
 %w{
   active_support/core_ext/module/attribute_accessors
@@ -55,6 +56,8 @@ module Carbon
   class RateLimited < RuntimeError # :nodoc:
   end
   class TriedToUseAsyncResponseAsNumber < RuntimeError # :nodoc:
+  end
+  class SlowResponse < RuntimeError # :nodoc:
   end
 
   # The api key obtained from http://keys.brighterplanet.com

@@ -22,7 +22,7 @@ module Carbon
       @emitter = emitter
     end
     
-    VALID_OPTIONS = [:callback_content_type, :key, :callback, :timeframe, :guid]
+    VALID_OPTIONS = [:callback_content_type, :key, :callback, :timeframe, :guid, :timeout]
     def take_options(options)
       return if options.blank?
       options.slice(*VALID_OPTIONS).each do |k, v|
@@ -57,6 +57,7 @@ module Carbon
     end
     attr_writer :callback_content_type
     attr_writer :key
+    attr_writer :timeout
     attr_accessor :callback
     attr_accessor :timeframe
     attr_accessor :guid
@@ -91,6 +92,10 @@ module Carbon
     end
     def mode
       async? ? :async : :realtime
+    end
+    # Timeout on realtime requests in seconds. Defaults to 2 seconds.
+    def timeout
+      @timeout || 2
     end
     def callback_content_type
       @callback_content_type || 'application/json'
