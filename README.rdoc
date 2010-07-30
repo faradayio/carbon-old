@@ -8,7 +8,7 @@ Give the quick start a try! Once you've exhausted that, read the {carbon gem RDo
 
 == Real-life integration guide
 
-In addition to the quick start and full documentation, check out the {integration guide}[link:files/doc/INTEGRATION_GUIDE_rdoc.html]. It has code examples from our real-life migration followed by brief developer commentary.
+In addition to the quick start and full documentation, check out the {integration guide}[http://github.com/brighterplanet/carbon/blob/master/doc/INTEGRATION_GUIDE.rdoc]. It has code examples from our real-life migration followed by brief developer commentary.
 
 == Quick start
 
