@@ -2,15 +2,19 @@ module Carbon
   class EmissionEstimate
     class Request
       attr_reader :parent
+
       def initialize(parent)
         @parent = parent
       end
+
       def body
         params.to_query
       end
+
       def params
         send "#{parent.mode}_params"
       end
+
       def async_params # :nodoc:
         raise ::ArgumentError, "When using :callback you cannot specify :defer" if parent.defer? and parent.callback
         raise ::ArgumentError, "When using :defer => true you must specify :guid" if parent.defer? and parent.guid.blank?
@@ -25,9 +29,11 @@ module Carbon
           :MessageBody => hash.to_query
         }
       end
+
       def realtime_params # :nodoc:
         _params
       end
+
       # Used internally, but you can look if you want.
       #
       # Returns the params hash that will be send to the emission estimate server.
@@ -60,12 +66,15 @@ module Carbon
         hash[:key] = parent.key if parent.key
         hash
       end
+
       def realtime_url # :nodoc:
         "#{::Carbon::REALTIME_URL}/#{parent.emitter.class.carbon_base.emitter_common_name.pluralize}.json"
       end
+
       def async_url # :nodoc:
         ::Carbon::ASYNC_URL
       end
+
       def url
         send "#{parent.mode}_url"
       end
