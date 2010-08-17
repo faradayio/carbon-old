@@ -130,11 +130,11 @@ module Carbon
     attr_accessor :sleep_before_performing
     VALID_OPTIONS.push :sleep_before_performing
     class Response
-      def _perform_with_delay
+      def perform_request_with_delay
         sleep parent.sleep_before_performing if parent.sleep_before_performing
-        _perform_without_delay
+        perform_request_without_delay
       end
-      alias_method_chain :_perform, :delay
+      alias_method_chain :perform_request, :delay
     end
   end
 end

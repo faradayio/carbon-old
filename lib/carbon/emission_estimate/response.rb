@@ -5,10 +5,12 @@ module Carbon
       attr_reader :data
       attr_reader :raw_request
       attr_reader :raw_response
+
       def initialize(parent)
         @parent = parent
         send "load_#{parent.mode}_data"
       end
+
       def load_realtime_data # :nodoc:
         attempts = 0
         response = nil
@@ -27,23 +29,27 @@ module Carbon
         raise ::Carbon::RealtimeEstimateFailed unless response.success?
         @data = ::Carbon::EmissionEstimate.parse response.body
       end
+
       def load_async_data # :nodoc:
         response = perform
         raise ::Carbon::QueueingFailed unless response.success?
         @data = {}
       end
+
+    private
       def perform # :nodoc:
         response = nil
         if parent.timeout
           ::SystemTimer.timeout_after(parent.timeout) do
-            response = _perform
+            response = perform_request
           end
         else
-          response = _perform
+          response = perform_request
         end
         response
       end
-      def _perform # :nodoc:
+
+      def perform_request # :nodoc:
         @raw_request = ::REST::Request.new :post, ::URI.parse(parent.request.url), parent.request.body, {'Content-Type' => 'application/x-www-form-urlencoded; charset=utf-8'}
         @raw_response = raw_request.perform
       end
