@@ -8,9 +8,13 @@ module Carbon
 
       def initialize(parent)
         @parent = parent
+      end
+
+      def load_data
         send "load_#{parent.mode}_data"
       end
 
+    private
       def load_realtime_data # :nodoc:
         attempts = 0
         response = nil

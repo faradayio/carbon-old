@@ -88,7 +88,9 @@ module Carbon
       current_params = request.params
       @response ||= {}
       return @response[current_params] if @response.has_key? current_params
-      @response[current_params] = Response.new self
+      response_object = Response.new self
+      response_object.load_data
+      @response[current_params] = response_object
     end
 
     def defer?
