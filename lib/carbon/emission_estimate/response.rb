@@ -21,7 +21,7 @@ module Carbon
         begin
           response = perform
           raise ::Carbon::RateLimited if response.status_code == 403 and response.body =~ /Rate Limit/i  #TODO: Should we expect an HTTP 402: payment required, instead?
-        rescue ::Carbon::RateLimited
+        rescue ::Carbon::RateLimited, EOFError
           if attempts < 4
             attempts += 1
             sleep 0.2 * attempts
@@ -40,7 +40,6 @@ module Carbon
         @data = {}
       end
 
-    private
       def perform # :nodoc:
         response = nil
         if parent.timeout
