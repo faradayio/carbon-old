@@ -16,7 +16,7 @@ module Carbon
         response = nil
         begin
           response = perform
-          raise ::Carbon::RateLimited if response.status_code == 403 and response.body =~ /Rate Limit/i
+          raise ::Carbon::RateLimited if response.status_code == 403 and response.body =~ /Rate Limit/i  #TODO: Should we expect an HTTP 402: payment required, instead?
         rescue ::Carbon::RateLimited
           if attempts < 4
             attempts += 1

@@ -10,6 +10,7 @@ module Carbon
       @klass = klass
       @emitter_common_name = emitter_common_name.to_s
     end
+
     # A completed translation table will look like:
     # {[:mixer, :size]=>"mixer_size",
     # :personnel=>:employees,
@@ -19,6 +20,7 @@ module Carbon
     def translation_table # :nodoc:
       @translation_table ||= Hash.new
     end
+
     # Indicate that you will send in a piece of data about the emitter.
     #
     # Two general rules:
@@ -50,6 +52,7 @@ module Carbon
       # translation_table[:make] = 'epa_code'
       translation_table[characteristic] = options[:key]
     end
+
     # Third-person singular preferred.
     alias :provides :provide
   end

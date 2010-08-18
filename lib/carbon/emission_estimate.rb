@@ -55,6 +55,7 @@ module Carbon
         super
       end
     end
+    
     attr_writer :callback_content_type
     attr_writer :key
     attr_writer :timeout
@@ -63,6 +64,7 @@ module Carbon
     attr_accessor :timeframe
     attr_accessor :guid
     attr_reader :emitter
+    
     def data
       if storage.present?
         storage.data
@@ -70,14 +72,17 @@ module Carbon
         response.data
       end
     end
+
     def storage
       @storage ||= {}
       return @storage[guid] if @storage.has_key? guid
       @storage[guid] = Storage.new self
     end
+
     def request
       @request ||= Request.new self
     end
+
     # Here's where caching takes place.
     def response
       current_params = request.params
@@ -85,43 +90,54 @@ module Carbon
       return @response[current_params] if @response.has_key? current_params
       @response[current_params] = Response.new self
     end
+
     def defer?
       @defer == true
     end
+
     def async?
       callback or defer?
     end
+
     def mode
       async? ? :async : :realtime
     end
+
     # Timeout on realtime requests in seconds, if desired.
     def timeout
       @timeout
     end
+
     def callback_content_type
       @callback_content_type || 'application/json'
     end
+
     def key
       @key || ::Carbon.key
     end
+
     # The timeframe being looked at in the emission calculation.
     def active_subtimeframe
       data['active_subtimeframe']
     end
+
     # Another way to access the emission value.
     # Useful if you don't like treating <tt>EmissionEstimate</tt> objects like <tt>Numeric</tt> objects (even though they do quack like numbers...)
     def number
       async? ? nil : data['emission'].to_f.freeze
     end
+
     # The units of the emission.
     def emission_units
       data['emission_units']
     end
+
     # Errors (and warnings) as reported in the response.
     # Note: may contain HTML tags like KBD or A
     def errors
       data['errors']
     end
+
     # The URL of the methodology report indicating how this estimate was calculated.
     #   > my_car.emission_estimate.methodology
     #   => 'http://carbon.brighterplanet.com/automobiles.html?[...]'
