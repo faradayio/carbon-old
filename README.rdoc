@@ -118,7 +118,7 @@ Since this gem connects to a web service, you need to be ready for network probl
 
     begin
       my_emission = my_car.emission_estimate
-    rescue ::SocketError, ::Timeout::Error, ::Errno::ETIMEDOUT, ::Errno::ENETUNREACH, ::Errno::ECONNRESET, ::Errno::ECONNREFUSED
+    rescue ::SocketError, ::EOFError, ::Timeout::Error, ::Errno::ETIMEDOUT, ::Errno::ENETUNREACH, ::Errno::ECONNRESET, ::Errno::ECONNREFUSED
       # These are general network errors raised by Net::HTTP.
       # Your internet connection might be down, or our servers might be down.
     rescue ::Carbon::RateLimited

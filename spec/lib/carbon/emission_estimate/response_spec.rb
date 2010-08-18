@@ -21,14 +21,13 @@ describe Carbon::EmissionEstimate::Response do
       response.send :load_realtime_data
     end
 
-    it 'should retry a request that gets cut off (server disappears mid-request)' do
+    it 'should not rescue from generic network errors' do
       response.should_receive(:perform).once.ordered.
         and_raise EOFError
-      response.should_receive(:perform).once.ordered.
-        and_return rest_response
 
-      response.send :load_realtime_data
+      lambda {
+        response.send :load_realtime_data
+      }.should raise_error EOFError
     end
   end
 end
-
