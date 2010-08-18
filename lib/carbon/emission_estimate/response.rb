@@ -26,13 +26,13 @@ module Carbon
             raise $!
           end
         end
-        raise ::Carbon::RealtimeEstimateFailed unless response.success?
+        raise ::Carbon::RealtimeEstimateFailed unless response.success? #TODO: should we expect 300s as well as 200s? Also, we may want to include response code and body in our exception.
         @data = ::Carbon::EmissionEstimate.parse response.body
       end
 
       def load_async_data # :nodoc:
         response = perform
-        raise ::Carbon::QueueingFailed unless response.success?
+        raise ::Carbon::QueueingFailed unless response.success? #TODO: should we expect 300s as well as 200s? Also, we may want to include response code and body in our exception.
         @data = {}
       end
 
