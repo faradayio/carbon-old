@@ -17,6 +17,15 @@ module Carbon
       data['updated_at'] = ::Time.parse(data['updated_at']) if data.has_key? 'updated_at'
       data
     end
+
+    attr_writer :callback_content_type
+    attr_writer :key
+    attr_writer :timeout
+    attr_writer :defer
+    attr_accessor :callback
+    attr_accessor :timeframe
+    attr_accessor :guid
+    attr_reader :emitter
     
     def initialize(emitter)
       @emitter = emitter
@@ -55,15 +64,6 @@ module Carbon
         super
       end
     end
-    
-    attr_writer :callback_content_type
-    attr_writer :key
-    attr_writer :timeout
-    attr_writer :defer
-    attr_accessor :callback
-    attr_accessor :timeframe
-    attr_accessor :guid
-    attr_reader :emitter
     
     def data
       if storage.present?
