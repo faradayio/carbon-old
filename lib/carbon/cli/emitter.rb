@@ -2,10 +2,9 @@ module Carbon
   module Cli
     class Emitter < Environment
       include Carbon
-      def initialize(name, key, input = {})
+      def initialize(name, input = {})
         @emitter = name
         @input = input
-        @key = key
         characteristics_url = "http://carbon.brighterplanet.com/#{@emitter.to_s.pluralize}/options.json"
         response = REST.get(characteristics_url)
         if response.ok?

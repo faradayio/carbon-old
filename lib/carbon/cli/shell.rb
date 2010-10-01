@@ -28,12 +28,12 @@ module Carbon
       end
       
       def key(k)
-        @key = k
-        puts "  => Using key #{k}"
+        ::Carbon.key = k
+        puts "  => Using key #{::Carbon.key}"
       end
 
       def emitter(e, saved = {})
-        ::IRB.start_session(Emitter.new(e, @key, saved).get_binding)
+        ::IRB.start_session(Emitter.new(e, saved).get_binding)
       end
     end
   end
