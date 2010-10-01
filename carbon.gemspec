@@ -5,7 +5,7 @@
 
 Gem::Specification.new do |s|
   s.name = %q{carbon}
-  s.version = "0.2.7"
+  s.version = "0.3.0"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Derek Kastner", "Seamus Abshere", "Andy Rossmeissl"]
@@ -68,6 +68,7 @@ Gem::Specification.new do |s|
       s.add_runtime_dependency(%q<timeframe>, [">= 0.0.7"])
       s.add_runtime_dependency(%q<SystemTimer>, [">= 1.2"])
       s.add_runtime_dependency(%q<blockenspiel>, [">= 0.3.2"])
+      s.add_runtime_dependency(%q<conversions>, ["~> 1"])
       s.add_development_dependency(%q<fakeweb>, [">= 1.2.8"])
       s.add_development_dependency(%q<rspec>, [">= 2.0.0.beta.17"])
     else
@@ -76,6 +77,7 @@ Gem::Specification.new do |s|
       s.add_dependency(%q<timeframe>, [">= 0.0.7"])
       s.add_dependency(%q<SystemTimer>, [">= 1.2"])
       s.add_dependency(%q<blockenspiel>, [">= 0.3.2"])
+      s.add_dependency(%q<conversions>, ["~> 1"])
       s.add_dependency(%q<fakeweb>, [">= 1.2.8"])
       s.add_dependency(%q<rspec>, [">= 2.0.0.beta.17"])
     end
@@ -85,6 +87,7 @@ Gem::Specification.new do |s|
     s.add_dependency(%q<timeframe>, [">= 0.0.7"])
     s.add_dependency(%q<SystemTimer>, [">= 1.2"])
     s.add_dependency(%q<blockenspiel>, [">= 0.3.2"])
+    s.add_dependency(%q<conversions>, ["~> 1"])
     s.add_dependency(%q<fakeweb>, [">= 1.2.8"])
     s.add_dependency(%q<rspec>, [">= 2.0.0.beta.17"])
   end
