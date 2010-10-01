@@ -9,9 +9,11 @@ Gem::Specification.new do |s|
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Derek Kastner", "Seamus Abshere", "Andy Rossmeissl"]
-  s.date = %q{2010-08-18}
+  s.date = %q{2010-10-01}
+  s.default_executable = %q{carbon}
   s.description = %q{Carbon is a Ruby API wrapper for the Brighter Planet emission estimate web service (http://carbon.brighterplanet.com). By querying the web service, it can estimate the carbon emissions of many real-life objects, such as cars and houses, based on particular attributes that they may have.}
   s.email = %q{derek.kastner@brighterplanet.com}
+  s.executables = ["carbon"]
   s.extra_rdoc_files = [
     "README.rdoc"
   ]
@@ -21,14 +23,17 @@ Gem::Specification.new do |s|
      "README.rdoc",
      "Rakefile",
      "VERSION",
+     "bin/carbon",
      "carbon.gemspec",
      "doc/INTEGRATION_GUIDE.rdoc",
      "doc/examining-response-with-jsonview.png",
+     "doc/shell_example",
      "doc/timeout-error.png",
      "doc/with-committee-reports.png",
      "doc/without-committee-reports.png",
      "lib/carbon.rb",
      "lib/carbon/base.rb",
+     "lib/carbon/cli.rb",
      "lib/carbon/emission_estimate.rb",
      "lib/carbon/emission_estimate/request.rb",
      "lib/carbon/emission_estimate/response.rb",

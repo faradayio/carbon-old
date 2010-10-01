@@ -146,5 +146,9 @@ module Carbon
     def methodology
       data['methodology']
     end
+    
+    def reports
+      data['reports']
+    end
   end
 end

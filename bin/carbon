@@ -1,7 +1,9 @@
 #!/usr/bin/env ruby
 $:.unshift(File.dirname(__FILE__) + '/../lib') unless $:.include?(File.dirname(__FILE__) + '/../lib')
 
+require 'rubygems'
 require 'carbon'
+require 'carbon/cli'
 begin
   # The dup is to keep ARGV intact, so that tools like ruby-debug can respawn.
   failure = Carbon::Cli.execute(ARGV.dup)
