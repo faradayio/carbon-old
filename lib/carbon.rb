@@ -75,9 +75,7 @@ module Carbon
     #     provide :make
     #   end
     def emit_as(emitter_common_name, &block)
-      unless self.carbon_base && self.carbon_base.emitter_common_name == emitter_common_name
-        self.carbon_base = ::Carbon::Base.new self, emitter_common_name
-      end
+      self.carbon_base = ::Carbon::Base.new self, emitter_common_name
       ::Blockenspiel.invoke block, carbon_base
     end
     # Third-person singular preferred.
