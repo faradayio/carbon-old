@@ -4,14 +4,8 @@ carbon> help
   => flight, automobile, ...
 carbon> flight
   => 974 kg CO2e
-flight> lbs
-  => 1300 lbs CO2e
-flight> tons
-  => 0.9 tons CO2e
 flight> help
   => origin_airport, destination_airport . . .
-flight> help origin_airport
-  => *iata_code*, name, country . . .
 flight> origin_airport 'lax'
   => 1123 kg CO2e
 flight> destination_airport 'jfk'
