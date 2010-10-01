@@ -4,6 +4,10 @@ carbon> help
   => flight, automobile, ...
 carbon> flight
   => 974 kg CO2e
+flight> lbs
+  => 123 lbs CO2e
+flight> tons
+  => 1 ton CO2e
 flight> help
   => origin_airport, destination_airport . . .
 flight> origin_airport 'lax'

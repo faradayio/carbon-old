@@ -35,7 +35,20 @@ module Carbon
       end
       
       def emission
-        puts "  => #{::Carbon::EmissionEstimate.new(self).to_f} kg CO2e"
+        puts "  => #{emission_in_kilograms} kg CO2e"
+      end
+      
+      def emission_in_kilograms
+        ::Carbon::EmissionEstimate.new(self).to_f
+      end
+      
+      def lbs
+        puts "  => #{emission_in_kilograms.kilograms.to :pounds} lbs CO2e"
+      end
+      alias :pounds :lbs
+      
+      def tons
+        puts "  => #{emission_in_kilograms.kilograms.to :tons} lbs CO2e"
       end
       
       def characteristics

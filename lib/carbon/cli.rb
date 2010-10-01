@@ -12,4 +12,4 @@ require 'carbon/cli/environment'
 require 'carbon/cli/shell'
 require 'carbon/cli/emitter'
 require 'carbon/cli/irb'
-
+require 'conversions'

@@ -16,6 +16,7 @@ begin
     # This is still only on Rubyforge
     gemspec.add_dependency 'SystemTimer', '>=1.2'
     gemspec.add_dependency 'blockenspiel', '>=0.3.2'
+    gemspec.add_dependency 'conversions', '~>1'
 
     gemspec.add_development_dependency 'fakeweb', '>=1.2.8'
     # sabshere 7/16/10 if you're having trouble running specs, try "rspec spec" and/or "sudo gem install rspec --pre"
