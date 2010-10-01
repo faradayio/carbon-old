@@ -2,9 +2,9 @@ module Carbon
   module Cli
     class Emitter < Environment
       include Carbon
-      def initialize(name, key)
+      def initialize(name, key, input = {})
         @emitter = name
-        @input = {}
+        @input = input
         @key = key
         characteristics_url = "http://carbon.brighterplanet.com/#{@emitter.to_s.pluralize}/options.json"
         response = REST.get(characteristics_url)
@@ -99,9 +99,13 @@ module Carbon
         "#{@emitter}*"
       end
       
+      def inspect
+        "<Emitter[#{@emitter}]: #{@input.inspect}>"
+      end
+      
       def done
         $emitters[@emitter] ||= []
-        $emitters[@emitter] << self
+        $emitters[@emitter] << @input
         puts "  => Saved as #{@emitter} ##{$emitters[@emitter].length - 1}"
         throw :IRB_EXIT
       end

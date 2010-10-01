@@ -7,8 +7,8 @@ module Carbon
         @emitters = JSON.parse(response.body)
         @emitters.each do |e|
           define_method e.to_sym do |*args|
-            if args.any? && num = args.first && saved = $emitters[e.to_sym][num]
-              IRB.start_session(saved.get_binding)
+            if args.any? and num = args.first and saved = $emitters[e.to_sym][num]
+              emitter e.to_sym, saved
             else
               emitter e.to_sym
             end
@@ -32,8 +32,8 @@ module Carbon
         puts "  => Using key #{k}"
       end
 
-      def emitter(e)
-        ::IRB.start_session(Emitter.new(e, @key).get_binding)
+      def emitter(e, saved = {})
+        ::IRB.start_session(Emitter.new(e, @key, saved).get_binding)
       end
     end
   end

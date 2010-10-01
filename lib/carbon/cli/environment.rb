@@ -8,7 +8,7 @@ module Carbon
       def get_binding() binding end
       
       def method_missing(*args)
-        return if [:extend].include? args.first
+        return if [:extend, :respond_to?].include? args.first
         puts "Unknown command #{args.first}"
       end
     end
