@@ -41,7 +41,7 @@ module Carbon
     
     class Environment
       instance_methods.each do |m|
-        undef_method(m) if m.to_s !~ /(?:^__|^nil\?$|^send$|^instance_eval$|^class$|^object_id$)/
+        undef_method(m) if m.to_s !~ /(?:^__|^nil\?$|^send$|^instance_eval$|^define_method$|^class$|^object_id$)/
       end
 
       def get_binding() binding end
@@ -53,8 +53,26 @@ module Carbon
     end
     
     class Shell < Environment
+      emitters_url = "http://carbon.brighterplanet.com/models.json"
+      response = REST.get(emitters_url)
+      if true || response.ok?
+        @emitters = JSON.parse(response.body)
+        @emitters.each do |e|
+          define_method e.to_sym do |*args|
+            if args.any? && num = args.first && saved = $emitters[e.to_sym][num]
+              IRB.start_session(saved.get_binding)
+            else
+              emitter e.to_sym
+            end
+          end
+        end
+      else
+        puts "  => Sorry, emitter types couldn't be retrieved (via #{emitters_url})"
+        done
+      end
+      
       def help
-        puts "  => FIXME A list of emitters should go here"
+        puts "  => #{@@emitters.join ', '}"
       end
       
       def to_s
@@ -65,15 +83,7 @@ module Carbon
         @key = k
         puts "  => Using key #{k}"
       end
-      
-      def flight(num = nil)
-        if num and saved = $emitters[:flight][num]
-          IRB.start_session(saved.get_binding)
-        else
-          emitter :flight
-        end
-      end
-      
+
       def emitter(e)
         IRB.start_session(Emitter.new(e, @key).get_binding)
       end
@@ -101,6 +111,9 @@ module Carbon
               end
             meth
           end
+          if self.class.carbon_base && self.class.carbon_base.translation_table.any?
+            self.class.carbon_base.reset_translation_table!
+          end
           provisions = @characteristics.keys.map { |k| "provide :#{k}"}.join('; ')
           emit_as_block = "emit_as(:#{name}) { #{provisions} }"
           self.class.class_eval emit_as_block
@@ -112,7 +125,7 @@ module Carbon
       end
       
       def emission
-        puts "  => #{::Carbon::EmissionEstimate.new(self).to_f}"
+        puts "  => #{::Carbon::EmissionEstimate.new(self).to_f} kg CO2e"
       end
       
       def characteristics

@@ -20,6 +20,10 @@ module Carbon
     def translation_table # :nodoc:
       @translation_table ||= Hash.new
     end
+    
+    def reset_translation_table!
+      @translation_table = Hash.new
+    end
 
     # Indicate that you will send in a piece of data about the emitter.
     #
