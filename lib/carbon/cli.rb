@@ -13,3 +13,9 @@ require 'carbon/cli/shell'
 require 'carbon/cli/emitter'
 require 'carbon/cli/irb'
 require 'conversions'
+
+if File.exist?(dotfile = File.join(ENV['HOME'], '.carbon_middleware'))
+  if (key = IO.readlines(dotfile).first).present?
+    ::Carbon.key = key.strip
+  end
+end
