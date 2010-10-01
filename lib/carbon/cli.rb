@@ -15,7 +15,7 @@ require 'carbon/cli/irb'
 require 'conversions'
 
 if File.exist?(dotfile = File.join(ENV['HOME'], '.carbon_middleware'))
-  if (key = IO.readlines(dotfile).first).present?
-    ::Carbon.key = key.strip
+  if (key = IO.read(dotfile).strip).present?
+    ::Carbon.key = key
   end
 end
