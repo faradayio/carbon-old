@@ -1,11 +1,13 @@
 module Carbon
   module Cli
     class Shell < Environment
+      cattr_accessor :emitters
+      
       emitters_url = "http://carbon.brighterplanet.com/models.json"
       response = REST.get(emitters_url)
       if true || response.ok?
-        @emitters = JSON.parse(response.body)
-        @emitters.each do |e|
+        self.emitters = JSON.parse(response.body)
+        emitters.each do |e|
           define_method e.to_sym do |*args|
             if args.any? and num = args.first and saved = $emitters[e.to_sym][num]
               emitter e.to_sym, saved
@@ -20,7 +22,7 @@ module Carbon
       end
       
       def help
-        puts "  => #{@@emitters.join ', '}"
+        puts "  => #{self.class.emitters.join ', '}"
       end
       
       def to_s
