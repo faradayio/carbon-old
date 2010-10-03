@@ -213,20 +213,21 @@ This library includes a special console for performing calculations interactivel
 === Shell mode
 
 [+help+]                           Displays a list of emitter types.
-[+_emitter_type_+]                 (e.g. *flight*) Enters emitter mode using this emitter type.
-[<tt><i>emitter_type num</i></tt>] (e.g. <b>flight 0</b>) Recalls a previous emitter from this session.
+[+_emitter_type_+]                 (e.g. +flight+) Enters emitter mode using this emitter type.
+[<tt><i>emitter_type num</i></tt>] (e.g. <tt>flight 0</tt>) Recalls a previous emitter from this session.
+[+exit+]                           Quits.
   
 === Emitter mode
 
-* *help* - Displays a list of characteristics for this emitter type.
-* */characteristic value/* (e.g. *origin_airport 'lax'*) - Provide a characteristic. Remember, this is Ruby we're dealing with, so strings must be quoted.
-* *emission* - Displays the current emission in kilograms CO2e for this emitter.
-* *lbs*, *pounds*, or *tons* - Display the emission using different units.
-* *characteristics* - Lists the characteristics you have provided so far.
-* *methodology* - Summarizes how the calculation is being made.
-* *reports* - Displays intermediate calculations that were made in pursuit of the emission estimate.
-* *url* - Generates a methodology URL suitable for pasting into your browser for further inspection.
-* *done* - Saves this emitter and returns to shell mode.
+[+help+]                               Displays a list of characteristics for this emitter type.
+[<tt><i>characteristic value</i></tt>] (e.g. <tt>origin_airport 'lax'</tt>) Provide a characteristic. Remember, this is Ruby we're dealing with, so strings must be quoted.
+[+emission+]                           Displays the current emission in kilograms CO2e for this emitter.
+[+lbs+, +pounds+, or +tons+]           Display the emission using different units.
+[+characteristics+]                    Lists the characteristics you have provided so far.
+[+methodology+]                        Summarizes how the calculation is being made.
+[+reports+]                            Displays intermediate calculations that were made in pursuit of the emission estimate.
+[+url+]                                Generates a methodology URL suitable for pasting into your browser for further inspection.
+[+done+]                               Saves this emitter and returns to shell mode.
 
 == Copyright
 
