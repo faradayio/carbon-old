@@ -212,9 +212,9 @@ This library includes a special console for performing calculations interactivel
 
 === Shell mode
 
-* [+help+] Displays a list of emitter types.
-* [+_emitter_type_+] (e.g. *flight*) Enters emitter mode using this emitter type.
-* [<tt><i>emitter_type num</i></tt>] (e.g. <b>flight 0</b>) Recalls a previous emitter from this session.
+[+help+]                           Displays a list of emitter types.
+[+_emitter_type_+]                 (e.g. *flight*) Enters emitter mode using this emitter type.
+[<tt><i>emitter_type num</i></tt>] (e.g. <b>flight 0</b>) Recalls a previous emitter from this session.
   
 === Emitter mode
 
