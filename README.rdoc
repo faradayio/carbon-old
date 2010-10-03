@@ -1,16 +1,82 @@
 = Carbon
 
-Carbon is a Ruby API wrapper for the {Brighter Planet emission estimate web service}[http://carbon.brighterplanet.com], which is located at http://carbon.brighterplanet.com. By querying the web service, it can estimate the carbon emissions of many real-life objects, such as cars and houses, based on particular attributes that they may have.
+Carbon is a Ruby API wrapper and command-line console for the {Brighter Planet emission estimate web service}[http://carbon.brighterplanet.com], which is located at http://carbon.brighterplanet.com. By querying the web service, it can estimate the carbon emissions of many real-life objects, such as cars and houses, based on particular attributes that they may have.
 
-== Full documentation
+Full documentation: {RDoc}[http://rdoc.info/projects/brighterplanet/carbon]
 
-Give the quick start a try! Once you've exhausted that, read the {carbon gem RDoc}[http://rdoc.info/projects/brighterplanet/carbon] for more.
+== Quick start 1: experimenting with the console
 
-== Real-life integration guide
+<b>You'll need a Brighter Planet API key. See the "API keys" section below for details.</b>
 
-In addition to the quick start and full documentation, check out the {integration guide}[http://github.com/brighterplanet/carbon/blob/master/doc/INTEGRATION_GUIDE.rdoc]. It has code examples from our real-life migration followed by brief developer commentary.
+First get the gem:
 
-== Quick start
+    $ gem install carbon
+
+Then start the console:
+
+    $ carbon
+    carbon->
+
+Provide your key:
+
+    carbon-> key '123ABC'
+      => Using key 123ABC
+      
+Start a flight calculation:
+
+    carbon-> flight
+      => 1210.66889895298 kg CO2e
+    flight*>
+
+Start providing characteristics:
+
+    flight*> origin_airport 'jfk'
+      => 1593.46008200024 kg CO2e
+    flight*> destination_airport 'lax'
+      => 1766.55536727522 kg CO2e
+
+Review what you've entered:
+
+    flight*> characteristics
+      => origin_airport: jfk
+         destination_airport: lax
+
+See how the calculation's being made:
+
+    flight*> methodology
+      => emission: from fuel and passengers with coefficients
+         [ ... ]
+         cohort: from t100
+         
+See intermediate calculations:
+
+    flight*> reports
+      => emission: 1766.55536727522
+         [ ... ]
+         cohort: {"members"=>262}
+
+Generate a methodology URL:
+
+    flight*> url
+      => http://carbon.brighterplanet.com/flights.json?origin_airport=jfk&destination_airport=lax&key=123ABC
+
+And when you're done:
+
+    flight*> done
+      => Saved as flight #0
+    carbon->
+
+You can recall this flight anytime during this same session:
+
+    carbon-> flight 0
+      => 1766.55536727522 kg CO2e
+    flight*> characteristics
+      => origin_airport: jfk
+         destination_airport: lax
+         
+For more, see the "Console" section below.
+
+== Quick start 2: using the library in your application
 
 <b>You'll need a Brighter Planet API key. See the "API keys" section below for details.</b>
 
@@ -67,15 +133,41 @@ You should get an API key from http://keys.brighterplanet.com and set it globall
 
 Now all of your queries will use that key.
 
-== A note on <tt>#to_characteristic</tt> and <tt>#to_param</tt>
+== Attribute serialization
 
-Once you understand how to map attributes using the DSL, you might still be confused about what the gem actually calls on your objects.
+Your objects' attributes are serialized via <tt>#to_characteristic</tt> or <tt>#to_param</tt> (in that order of preference) before being submitted to the web service. 
 
-The answer: <tt>#to_characteristic</tt> and, failing that, <tt>#to_param</tt>.
+For example:
 
-Let's say <tt>RentalCar#make</tt> returns a <tt>Make</tt> object. You should define either <tt>Make#to_characteristic</tt> or <tt>Make#to_param</tt>. The gem <b>doesn't know</b> that you want it to call <tt>Make#name</tt> or <tt>Make#epa_code</tt> or anything else.
+    class RentalCar < ActiveRecord::Base
+      belongs_to :automobile_make
+      emit_as :automobile do
+        provide :automobile_make, :as => :make
+      end
+    end
+    
+    class AutomobileMake < ActiveRecord::Base # schema includes :name
+      has_many :rental_cars
+      alias :to_characteristic :name
+    end
+    
+Without <tt>AutomobileMake#to_characteristic</tt>, the library would have no way of knowing how to serialize.
 
-== A note on asynchronous queries
+== Using timeouts
+
+    > RentalCar.new.emission_estimate :timeout => 100
+    
+Runs a realtime request but allows timing out the network call. Raises <tt>Timeout::Error</tt> if timeout is exceeded.
+
+== Persisted queries
+
+You can specify that the result be persisted in low-latency storage so that future identical requests can use the same estimate:
+
+    > RentalCar.new.emission_estimate :guid => 'A_GLOBALLY_UNIQUE_IDENTIFIER_FOR_THIS_EMISSION_ESTIMATE'
+
+== Asynchronous queries
+
+=== Using a callback
 
 To specify that the result of a query should be POSTed back to you, simply pass an URL as the <tt>:callback</tt> option to <tt>#emission_estimate</tt>:
 
@@ -83,36 +175,17 @@ To specify that the result of a query should be POSTed back to you, simply pass 
 
 A good way to test this is to set up a {PostBin}[http://postbin.org].
 
-You can specify that the result be stored on S3 so that future identical requests can use the same estimate:
+=== Using polling
 
-    > RentalCar.new.emission_estimate :guid => 'A_GLOBALLY_UNIQUE_IDENTIFIER_FOR_THIS_EMISSION_ESTIMATE'
+By combining <tt>:guid</tt> and <tt>:defer => true</tt>, you can poll for a result:
 
-You might think of <tt>:guid</tt> as a hash key or a cache key, but it is not necessarily unique to the emitter object... rather it should identify the particular set of characteristics on that emitter. That way other emitters, if they have the same characteristics, can use the same estimate.
+    > batmobile.emission_estimate :guid => '[...]', :defer => true
+    # Do other things . . . and then:
+    > batmobile.emission_estimate :guid => '[...]'
 
-If you combine <tt>:guid</tt> and <tt>:defer => true</tt>, you have an easy, cheap 2-pass reporting system:
+If the result isn't available by the time you want it, a standard synchronous estimate will be provided.
 
-    # pass 1: cron job runs a whole bunch of these
-    > car51.emission_estimate :guid => '[...]', :defer => true
-    > car52.emission_estimate :guid => '[...]', :defer => true
-    > car96.emission_estimate :guid => '[...]', :defer => true
-    
-    # pass 2: a while later, cron job runs these
-    > car51.emission_estimate :guid => '[...]'
-    > car52.emission_estimate :guid => '[...]'
-    > car96.emission_estimate :guid => '[...]'
-
-Most of these will be pre-calculated by the time you run pass #2. If any of them aren't done processing yet, it will revert to a real-time estimate... no big deal!
-
-== Possible combinations
-
-* () Runs a normal realtime request.
-* (timeout) Runs a realtime request but allows timing out the network call. Raises <tt>Timeout::Error</tt> if timeout is exceeded.
-* (guid) Runs a realtime request, but first checks if there is a result pre-calculated on S3. Stores result to S3 if there isn't.
-* (callback) Runs an async request (so you don't immediately get the result back). The result will be POSTed to the URL you specify.
-* (guid,defer) Runs an async request (so you don't immediately get the result back). The result will be stored to S3 as <tt>hxxp://storage.carbon.brighterplanet.com/SHA1-hexdigest-of-key+guid</tt>
-* (guid,timeout) (NOT IMPLEMENTED) A hybrid "best effort" request that is as cheap as an async request but will try to return the full result data immediately. It keeps trying S3 until your timeout is exceeded, at which point it's just a normal async request.
-
-== A note on exceptions
+== Exceptions
 
 Since this gem connects to a web service, you need to be ready for network problems and latency. For example:
 
@@ -120,21 +193,40 @@ Since this gem connects to a web service, you need to be ready for network probl
       my_emission = my_car.emission_estimate
     rescue ::SocketError, ::EOFError, ::Timeout::Error, ::Errno::ETIMEDOUT, ::Errno::ENETUNREACH, ::Errno::ECONNRESET, ::Errno::ECONNREFUSED
       # These are general network errors raised by Net::HTTP.
-      # Your internet connection might be down, or our servers might be down.
+      # Your internet connection might be down.
     rescue ::Carbon::RateLimited
-      # Realtime mode only.
-      # In order to prevent denial-of-service attacks, our servers rate limit requests.
+      # In order to prevent denial-of-service attacks, our servers limit request rates.
       # The gem will try up to three times to get an answer back from the server, waiting slightly longer each time.
       # If you still get this exception, please contact us at staff@brighterplanet.com and we'll lift your rate.
     rescue ::Carbon::RealtimeEstimateFailed
-      # Realtime mode only.
       # Our server returned a 4XX or 5XX error.
-      # Please contact us at staff@brighterplanet.com if you get these more than a couple times.
+      # Please contact us at staff@brighterplanet.com.
     rescue ::Carbon::QueueingFailed
-      # Async mode only.
       # The gem connects directly to Amazon SQS in order to provide maximum throughput. If that service returns anything other than success, you get this exception.
-      # Please contact us at staff@brighterplanet.com if you see too many of these.
+      # Please contact us at staff@brighterplanet.com.
     end
+    
+== Console
+
+This library includes a special console for performing calculations interactively. Quick Start #1 provides an example session. Here is a command reference:
+
+=== Shell mode
+
+  * *help* - Displays a list of emitter types.
+  * */emitter_type/* (e.g. *flight*) - Enters emitter mode using this emitter type.
+  * */emitter_type num/* (e.g. *flight 0*) - Recalls a previous emitter from this session.
+  
+=== Emitter mode
+
+  * *help* - Displays a list of characteristics for this emitter type.
+  * */characteristic value/* (e.g. *origin_airport 'lax'*) - Provide a characteristic. Remember, this is Ruby we're dealing with, so strings must be quoted.
+  * *emission* - Displays the current emission in kilograms CO2e for this emitter.
+  * *lbs*, *pounds*, or *tons* - Display the emission using different units.
+  * *characteristics* - Lists the characteristics you have provided so far.
+  * *methodology* - Summarizes how the calculation is being made.
+  * *reports* - Displays intermediate calculations that were made in pursuit of the emission estimate.
+  * *url* - Generates a methodology URL suitable for pasting into your browser for further inspection.
+  * *done* - Saves this emitter and returns to shell mode.
 
 == Copyright
 
