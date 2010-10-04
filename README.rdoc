@@ -213,6 +213,7 @@ This library includes a special console for performing calculations interactivel
 === Shell mode
 
 [+help+]                           Displays a list of emitter types.
+[+key+ _yourkey_]                  Set the {developer key}[http://keys.brighterplanet.com] that should be used for this session. Alternatively, put this key in <tt>~/.carbon_middleware</tt> and will be auto-selected on console startup.
 [+_emitter_type_+]                 (e.g. +flight+) Enters emitter mode using this emitter type.
 [<tt><i>emitter_type num</i></tt>] (e.g. <tt>flight 0</tt>) Recalls a previous emitter from this session.
 [+exit+]                           Quits.
