@@ -3,8 +3,6 @@ require 'blockenspiel'
 require 'timeframe'
 require 'digest/sha1'
 require 'rest'    # provided by nap gem
-gem 'SystemTimer' # >=1.2, so as not to be confused with system_timer 1.0
-require 'system_timer'
 require 'active_support'
 require 'active_support/version'
 %w{

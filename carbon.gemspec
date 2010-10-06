@@ -9,7 +9,7 @@ Gem::Specification.new do |s|
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Derek Kastner", "Seamus Abshere", "Andy Rossmeissl"]
-  s.date = %q{2010-10-01}
+  s.date = %q{2010-10-05}
   s.default_executable = %q{carbon}
   s.description = %q{Carbon is a Ruby API wrapper for the Brighter Planet emission estimate web service (http://carbon.brighterplanet.com). By querying the web service, it can estimate the carbon emissions of many real-life objects, such as cars and houses, based on particular attributes that they may have.}
   s.email = %q{derek.kastner@brighterplanet.com}
@@ -50,6 +50,7 @@ Gem::Specification.new do |s|
   s.homepage = %q{http://carbon.brighterplanet.com/libraries}
   s.rdoc_options = ["--charset=UTF-8"]
   s.require_paths = ["lib"]
+  s.required_ruby_version = Gem::Requirement.new("~> 1.9.1")
   s.rubygems_version = %q{1.3.7}
   s.summary = %q{Carbon is a Ruby API wrapper for the Brighter Planet emission estimate web service (http://carbon.brighterplanet.com).}
   s.test_files = [
@@ -66,7 +67,6 @@ Gem::Specification.new do |s|
       s.add_runtime_dependency(%q<activesupport>, [">= 2.3.5"])
       s.add_runtime_dependency(%q<nap>, [">= 0.4"])
       s.add_runtime_dependency(%q<timeframe>, [">= 0.0.7"])
-      s.add_runtime_dependency(%q<SystemTimer>, [">= 1.2"])
       s.add_runtime_dependency(%q<blockenspiel>, [">= 0.3.2"])
       s.add_runtime_dependency(%q<conversions>, ["~> 1"])
       s.add_development_dependency(%q<fakeweb>, [">= 1.2.8"])
@@ -75,7 +75,6 @@ Gem::Specification.new do |s|
       s.add_dependency(%q<activesupport>, [">= 2.3.5"])
       s.add_dependency(%q<nap>, [">= 0.4"])
       s.add_dependency(%q<timeframe>, [">= 0.0.7"])
-      s.add_dependency(%q<SystemTimer>, [">= 1.2"])
       s.add_dependency(%q<blockenspiel>, [">= 0.3.2"])
       s.add_dependency(%q<conversions>, ["~> 1"])
       s.add_dependency(%q<fakeweb>, [">= 1.2.8"])
@@ -85,7 +84,6 @@ Gem::Specification.new do |s|
     s.add_dependency(%q<activesupport>, [">= 2.3.5"])
     s.add_dependency(%q<nap>, [">= 0.4"])
     s.add_dependency(%q<timeframe>, [">= 0.0.7"])
-    s.add_dependency(%q<SystemTimer>, [">= 1.2"])
     s.add_dependency(%q<blockenspiel>, [">= 0.3.2"])
     s.add_dependency(%q<conversions>, ["~> 1"])
     s.add_dependency(%q<fakeweb>, [">= 1.2.8"])

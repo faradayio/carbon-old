@@ -43,7 +43,7 @@ module Carbon
       def perform # :nodoc:
         response = nil
         if parent.timeout
-          ::SystemTimer.timeout_after(parent.timeout) do
+          Timeout.timeout(parent.timeout) do
             response = perform_request
           end
         else
