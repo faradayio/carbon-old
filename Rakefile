@@ -11,8 +11,6 @@ begin
     gemspec.homepage = 'http://carbon.brighterplanet.com/libraries'
     gemspec.authors = ['Derek Kastner', 'Seamus Abshere', 'Andy Rossmeissl']
 
-    gemspec.required_ruby_version = '~>1.9.1'
-
     gemspec.add_dependency 'activesupport', '>=2.3.5'
     gemspec.add_dependency 'nap', '>=0.4'
     gemspec.add_dependency 'timeframe', '>=0.0.7'

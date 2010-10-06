@@ -52,7 +52,6 @@ Gem::Specification.new do |s|
   s.homepage = %q{http://carbon.brighterplanet.com/libraries}
   s.rdoc_options = ["--charset=UTF-8"]
   s.require_paths = ["lib"]
-  s.required_ruby_version = Gem::Requirement.new("~> 1.9.1")
   s.rubygems_version = %q{1.3.7}
   s.summary = %q{Carbon is a Ruby API wrapper for the Brighter Planet emission estimate web service (http://carbon.brighterplanet.com).}
   s.test_files = [
