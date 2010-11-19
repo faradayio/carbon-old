@@ -1,3 +1,5 @@
+# encoding: utf-8
+
 require 'irb'
 
 module IRB # :nodoc:
