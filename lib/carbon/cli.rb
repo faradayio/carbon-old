@@ -1,6 +1,7 @@
 module Carbon
   module Cli
     def execute(*)
+      Shell.init
       $emitters = {}
       IRB.start_session(Shell.new.get_binding)
     end 

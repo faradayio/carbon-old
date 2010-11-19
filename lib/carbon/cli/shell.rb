@@ -1,24 +1,28 @@
+require 'carbon/cli/environment'
+
 module Carbon
   module Cli
     class Shell < Environment
       cattr_accessor :emitters
       
-      emitters_url = "http://carbon.brighterplanet.com/models.json"
-      response = REST.get(emitters_url)
-      if true || response.ok?
-        self.emitters = JSON.parse(response.body)
-        emitters.each do |e|
-          define_method e.to_sym do |*args|
-            if args.any? and num = args.first and saved = $emitters[e.to_sym][num]
-              emitter e.to_sym, saved
-            else
-              emitter e.to_sym
+      def self.init
+        emitters_url = "http://carbon.brighterplanet.com/models.json"
+        response = REST.get(emitters_url)
+        if true || response.ok?
+          self.emitters = JSON.parse(response.body)
+          emitters.map(&:underscore).each do |e|
+            define_method e.to_sym do |*args|
+              if args.any? and num = args.first and saved = $emitters[e.to_sym][num]
+                emitter e.to_sym, saved
+              else
+                emitter e.to_sym
+              end
             end
           end
+        else
+          puts "  => Sorry, emitter types couldn't be retrieved (via #{emitters_url})"
+          done
         end
-      else
-        puts "  => Sorry, emitter types couldn't be retrieved (via #{emitters_url})"
-        done
       end
       
       def help
