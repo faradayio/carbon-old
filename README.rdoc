@@ -133,6 +133,22 @@ You should get an API key from http://keys.brighterplanet.com and set it globall
 
 Now all of your queries will use that key.
 
+== Timeframes
+
+You submit this query about a flight in 2009, but the result is 0.0 kilograms. Why?
+    
+http://carbon.brighterplanet.com/flights.html?date=2009-10-13
+
+It's telling you that a flight in 2009 did not result in any 2011 emissions. Try this:
+
+http://carbon.brighterplanet.com/flights.html?date=2009-10-13&timeframe=2009
+
+That will tell you 850 kilograms emitted in 2009. If you need more specific timeframes, use the full form:
+  
+http://carbon.brighterplanet.com/flights.html?date=2009-10-13&timeframe=2009-01-01/2012-01-01
+
+More information about timeframes at the {timeframe gem}[http://rubygems.org/gems/timeframe].
+
 == Attribute serialization
 
 Your objects' attributes are serialized via <tt>#to_characteristic</tt> or <tt>#to_param</tt> (in that order of preference) before being submitted to the web service. 
@@ -232,4 +248,4 @@ This library includes a special console for performing calculations interactivel
 
 == Copyright
 
-Copyright (c) 2010 Brighter Planet.
+Copyright (c) 2011 Brighter Planet.
