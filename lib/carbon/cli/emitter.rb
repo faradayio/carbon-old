@@ -36,10 +36,10 @@ module Carbon
       
       def timeframe(t = nil)
         if t
-          @input[:timeframe] = t
+          @timeframe = t
           emission
         else
-          @input[:timeframe]
+          @timeframe
         end
       end
       
@@ -48,7 +48,7 @@ module Carbon
       end
       
       def emission_in_kilograms
-        ::Carbon::EmissionEstimate.new(self).to_f
+        ::Carbon::EmissionEstimate.new(self, :timeframe => @timeframe).to_f
       end
       
       def lbs

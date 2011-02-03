@@ -27,8 +27,9 @@ module Carbon
     attr_accessor :guid
     attr_reader :emitter
     
-    def initialize(emitter)
+    def initialize(emitter, options = {})
       @emitter = emitter
+      take_options options unless options.empty?
     end
     
     VALID_OPTIONS = [:callback_content_type, :key, :callback, :timeframe, :guid, :timeout, :defer]
