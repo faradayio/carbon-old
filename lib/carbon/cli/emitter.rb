@@ -8,7 +8,7 @@ module Carbon
         characteristics_url = "http://carbon.brighterplanet.com/#{@emitter.to_s.pluralize}/options.json"
         response = REST.get(characteristics_url)
         if response.ok?
-          @characteristics = JSON.parse(response.body)
+          @characteristics = ActiveSupport::JSON.decode response.body
           @characteristics.keys.each do |characteristic|
             instance_eval <<-meth
               def #{characteristic}(arg = nil)

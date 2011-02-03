@@ -1,6 +1,4 @@
 require 'spec_helper'
-require 'active_support/json/encoding'
-require 'fakeweb'
 
 CALLBACK_URL = 'http://www.postbin.org/1dj0146'
 KEY = 'valid'

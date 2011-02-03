@@ -16,7 +16,7 @@ describe Carbon::Cli::Shell do
   describe '.init' do
     it 'should create methods for each model' do
       Carbon::Cli::Shell.init
-      Carbon::Cli::Shell.instance_methods.should include(:automobile)
+      Carbon::Cli::Shell.instance_methods.should include('automobile')
     end
     it 'should exit if the models cannot be fetched' do
       pending

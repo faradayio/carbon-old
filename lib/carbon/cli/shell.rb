@@ -9,7 +9,7 @@ module Carbon
         emitters_url = "http://carbon.brighterplanet.com/models.json"
         response = REST.get(emitters_url)
         if true || response.ok?
-          self.emitters = JSON.parse(response.body)
+          self.emitters = ActiveSupport::JSON.decode response.body
           emitters.map(&:underscore).each do |e|
             define_method e.to_sym do |*args|
               if args.any? and num = args.first and saved = $emitters[e.to_sym][num]
