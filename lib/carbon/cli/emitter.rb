@@ -34,6 +34,15 @@ module Carbon
         end
       end
       
+      def timeframe(t = nil)
+        if t
+          @input[:timeframe] = t
+          emission
+        else
+          @input[:timeframe]
+        end
+      end
+      
       def emission
         puts "  => #{emission_in_kilograms} kg CO2e"
       end
