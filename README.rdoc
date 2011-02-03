@@ -246,7 +246,7 @@ In Emitter mode, the prompt displays the emitter type in use. If a timeframe has
 [+help+]                               Displays a list of characteristics for this emitter type.
 [<tt><i>characteristic value</i></tt>] (e.g. <tt>origin_airport 'lax'</tt>) Provide a characteristic. Remember, this is Ruby we're dealing with, so strings must be quoted.
 [+timeframe+]                          Display the current timeframe in effect on the emission estimate.
-[<tt>timeframe <i>timeframe</i></tt>]  Set a timeframe on the emission estimate.
+[<tt>timeframe <i>timeframe</i></tt>]  (e.g. <tt>timeframe '2009-01-01/2010-0101'</tt> or just <tt>timeframe '2009'</tt>) Set a timeframe on the emission estimate.
 [+emission+]                           Displays the current emission in kilograms CO2e for this emitter.
 [+lbs+, +pounds+, or +tons+]           Display the emission using different units.
 [+characteristics+]                    Lists the characteristics you have provided so far.
