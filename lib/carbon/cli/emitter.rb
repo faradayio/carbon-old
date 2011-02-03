@@ -77,7 +77,7 @@ module Carbon
       end
       
       def url
-        request = ::Carbon::EmissionEstimate.new(self).request
+        request = ::Carbon::EmissionEstimate.new(self, :timeframe => @timeframe).request
         url = request.url
         if request.body.present?
           url << '?'
@@ -88,7 +88,7 @@ module Carbon
       
       def methodology
         first = true
-        ::Carbon::EmissionEstimate.new(self).reports.each do |report|
+        ::Carbon::EmissionEstimate.new(self, :timeframe => @timeframe).reports.each do |report|
           if first
             w = '  => '
             first = false
@@ -101,7 +101,7 @@ module Carbon
       
       def reports
         first = true
-        ::Carbon::EmissionEstimate.new(self).reports.each do |report|
+        ::Carbon::EmissionEstimate.new(self, @timeframe => :timeframe).reports.each do |report|
           if first
             w = '  => '
             first = false
