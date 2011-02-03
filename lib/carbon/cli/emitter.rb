@@ -38,8 +38,10 @@ module Carbon
         if t
           @timeframe = t
           emission
+        elsif @timeframe
+          puts '  => ' + @timeframe
         else
-          @timeframe
+          puts '  => (defaults to current year)'
         end
       end
       
@@ -117,7 +119,11 @@ module Carbon
       end
       
       def to_s
-        "#{@emitter}*"
+        if @timeframe
+          "#{@emitter}[#{@timeframe}]*"
+        else          
+          "#{@emitter}*"
+        end
       end
       
       def inspect
