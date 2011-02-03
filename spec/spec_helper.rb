@@ -2,7 +2,6 @@ require 'rubygems'
 require 'bundler'
 Bundler.setup
 require 'rspec'
-require 'ruby-debug'
 require 'active_support/json/encoding'
 require 'fakeweb'
 $LOAD_PATH.unshift(File.dirname(__FILE__))

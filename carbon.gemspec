@@ -27,9 +27,4 @@ Gem::Specification.new do |s|
   s.add_dependency 'conversions'
   s.add_development_dependency 'fakeweb'
   s.add_development_dependency 'rspec'
-  if RUBY_VERSION > '1.9'
-    s.add_development_dependency 'ruby-debug19'
-  else
-    s.add_development_dependency 'ruby-debug'
-  end
 end
