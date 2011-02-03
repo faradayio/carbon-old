@@ -154,7 +154,7 @@ It's telling you that a flight in 2009 did not result in any 2011 emissions (the
 
 So, 850 kilograms emitted in 2009.
 
-== Attribute serialization
+== Association serialization
 
 Your objects' attributes are serialized via <tt>#to_characteristic</tt> or <tt>#to_param</tt> (in that order of preference) before being submitted to the web service. 
 
