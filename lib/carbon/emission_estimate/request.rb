@@ -12,7 +12,15 @@ module Carbon
       end
 
       def params
-        send "#{parent.mode}_params"
+        params = send "#{parent.mode}_params"
+        validate(params)
+        params
+      end
+
+      def validate(params_hash)
+        unless params_hash.key? :key
+          Carbon.warn 'You have not specified an API key. Please obtain a key from http://keys.brighterplanet.com.'
+        end
       end
 
       def async_params # :nodoc:
