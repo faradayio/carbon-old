@@ -36,6 +36,10 @@ module Carbon
       def emitter(e, saved = {})
         ::IRB.start_session(Emitter.new(e, saved).get_binding)
       end
+
+      def quit
+        exit
+      end
     end
   end
 end
