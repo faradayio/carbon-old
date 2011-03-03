@@ -11,6 +11,7 @@ require 'active_support/version'
   active_support/core_ext/hash/keys
   active_support/core_ext/hash/reverse_merge
   active_support/core_ext/object/to_query
+  active_support/inflector
   active_support/inflector/inflections
   active_support/json/decoding
 }.each do |active_support_3_requirement|
