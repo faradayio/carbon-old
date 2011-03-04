@@ -12,9 +12,10 @@ module Carbon
       end
 
       def params
-        params = send "#{parent.mode}_params"
-        validate(params)
-        params
+        return @params unless @params.nil?
+        @params = send "#{parent.mode}_params"
+        validate(@params)
+        @params
       end
 
       def validate(params_hash)
