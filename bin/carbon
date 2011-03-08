@@ -3,6 +3,4 @@ $:.unshift(File.dirname(__FILE__) + '/../lib') unless $:.include?(File.dirname(_
 
 require 'rubygems'
 require 'carbon'
-require 'bombshell'
-require 'carbon/shell'
 Bombshell.launch(Carbon::Shell)
