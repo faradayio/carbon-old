@@ -20,6 +20,7 @@ end if ActiveSupport::VERSION::MAJOR == 3
 
 require 'carbon/base'
 require 'carbon/emission_estimate'
+require 'logger'
 
 # A module (aka mixin) that lets you estimate carbon emissions by querying the {Brighter Planet carbon middleware emission estimate web service}[http://carbon.brighterplanet.com].
 #
@@ -61,6 +62,13 @@ module Carbon
 
   # The api key obtained from http://keys.brighterplanet.com
   mattr_accessor :key
+
+  mattr_accessor :log
+
+  def self.log
+    @log ||= Logger.new STDOUT
+  end
+  def self.warn(msg); log.warn msg; end
     
   # You will probably never access this module directly. Instead, you'll use it through the DSL.
   #
