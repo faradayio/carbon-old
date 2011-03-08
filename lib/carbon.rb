@@ -20,7 +20,6 @@ end if ActiveSupport::VERSION::MAJOR == 3
 
 require 'carbon/base'
 require 'carbon/emission_estimate'
-require 'carbon/shell'
 
 # A module (aka mixin) that lets you estimate carbon emissions by querying the {Brighter Planet carbon middleware emission estimate web service}[http://carbon.brighterplanet.com].
 #
