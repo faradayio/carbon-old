@@ -26,6 +26,7 @@ Gem::Specification.new do |s|
   s.add_dependency 'blockenspiel'
   s.add_dependency 'conversions'
   s.add_dependency 'brighter_planet_metadata'
+  s.add_dependency 'bombshell'
   s.add_development_dependency 'fakeweb'
   s.add_development_dependency 'rspec'
 end
