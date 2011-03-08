@@ -39,7 +39,7 @@ module Carbon
   end
 end
 
-if File.exist?(dotfile = File.join(ENV['HOME'], '.carbon_middleware'))
+if File.exist?(dotfile = File.join(ENV['HOME'], '.brighter_planet'))
   if (key = File.read(dotfile).strip).present?
     ::Carbon.key = key
   end
