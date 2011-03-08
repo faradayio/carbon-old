@@ -144,7 +144,7 @@ module Carbon
         $emitters[@emitter] ||= []
         $emitters[@emitter] << @input
         puts "  => Saved as #{@emitter} ##{$emitters[@emitter].length - 1}"
-        throw :IRB_EXIT
+        quit
       end
       
       class << self
