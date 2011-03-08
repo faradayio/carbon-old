@@ -120,16 +120,20 @@ module Carbon
         puts "  => #{@characteristics.keys.join ', '}"
       end
       
-      prompt_with do
-        if @timeframe
-          "#{emitter_name}[#{@timeframe}]*"
+      prompt_with do |emitter|
+        if emitter._timeframe
+          "#{emitter._name}[#{emitter._timeframe}]*"
         else          
-          "#{emitter_name}*"
+          "#{emitter._name}*"
         end
       end
       
-      before_launch do |name|
-        @name = name
+      def _name
+        @emitter
+      end
+      
+      def _timeframe
+        @timeframe
       end
       
       def inspect
