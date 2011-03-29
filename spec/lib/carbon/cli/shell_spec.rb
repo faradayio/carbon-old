@@ -1,14 +1,8 @@
 require 'spec_helper'
-require 'carbon/cli/shell'
+require 'carbon/shell'
 
-describe Carbon::Cli::Shell do
-  let(:shell) { Carbon::Cli::Shell.new }
-
-  describe '.init' do
-    it 'should create methods for each model' do
-      Carbon::Cli::Shell.init
-      Carbon::Cli::Shell.instance_methods.should include('automobile')
-    end
+describe Carbon::Shell do
+  it 'should create methods for each model' do
+    Carbon::Shell.instance_methods.should include('automobile')
   end
 end
-
