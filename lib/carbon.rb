@@ -46,10 +46,6 @@ module Carbon
     klass.extend ClassMethods
   end
   
-  REALTIME_URL = 'http://carbon.brighterplanet.com'
-  ASYNC_URL = 'https://queue.amazonaws.com/121562143717/cm1_production_incoming'
-  STORAGE_URL = 'http://storage.carbon.brighterplanet.com'
-  
   class RealtimeEstimateFailed < RuntimeError # :nodoc:
   end
   class QueueingFailed < RuntimeError # :nodoc:
@@ -64,10 +60,13 @@ module Carbon
 
   mattr_accessor :log
 
-  def self.log
+  def self.log #:nodoc:
     @log ||= Logger.new STDOUT
   end
-  def self.warn(msg); log.warn msg; end
+  
+  def self.warn(msg) #:nodoc:
+    log.warn msg
+  end
     
   # You will probably never access this module directly. Instead, you'll use it through the DSL.
   #

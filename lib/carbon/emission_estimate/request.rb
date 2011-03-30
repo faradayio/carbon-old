@@ -1,6 +1,6 @@
 module Carbon
   class EmissionEstimate
-    class Request
+    class Request #:nodoc:all
       attr_reader :parent
 
       def initialize(parent)
@@ -12,10 +12,9 @@ module Carbon
       end
 
       def params
-        return @params unless @params.nil?
-        @params = send "#{parent.mode}_params"
-        validate(@params)
-        @params
+        params = send "#{parent.mode}_params"
+        validate params
+        params
       end
 
       def validate(params_hash)
@@ -24,7 +23,7 @@ module Carbon
         end
       end
 
-      def async_params # :nodoc:
+      def async_params
         raise ::ArgumentError, "When using :callback you cannot specify :defer" if parent.defer? and parent.callback
         raise ::ArgumentError, "When using :defer => true you must specify :guid" if parent.defer? and parent.guid.blank?
         hash = _params
@@ -39,7 +38,7 @@ module Carbon
         }
       end
 
-      def realtime_params # :nodoc:
+      def realtime_params
         _params
       end
 
@@ -76,12 +75,20 @@ module Carbon
         hash
       end
 
-      def realtime_url # :nodoc:
-        "#{::Carbon::REALTIME_URL}/#{parent.emitter.class.carbon_base.emitter_common_name.pluralize}.json"
+      def realtime_url
+        uri = ::URI.parse ''
+        uri.scheme = 'http'
+        uri.host = parent.certified? ? 'certified.carbon.brighterplanet.com' : 'carbon.brighterplanet.com'
+        uri.path = "/#{parent.emitter.class.carbon_base.emitter_common_name.pluralize}.json"
+        uri.to_s
       end
 
-      def async_url # :nodoc:
-        ::Carbon::ASYNC_URL
+      def async_url
+        uri = ::URI.parse ''
+        uri.scheme = 'https'
+        uri.host = 'queue.amazonaws.com'
+        uri.path = parent.certified? ? '/121562143717/cm1_production_incoming_certified' : '/121562143717/cm1_production_incoming'
+        uri.to_s
       end
 
       def url

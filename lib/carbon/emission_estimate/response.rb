@@ -1,6 +1,6 @@
 module Carbon
   class EmissionEstimate
-    class Response
+    class Response #:nodoc:all
       attr_reader :parent
       attr_reader :data
       attr_reader :raw_request
@@ -15,7 +15,7 @@ module Carbon
       end
 
     private
-      def load_realtime_data # :nodoc:
+      def load_realtime_data
         attempts = 0
         response = nil
         begin
@@ -34,13 +34,13 @@ module Carbon
         @data = ::Carbon::EmissionEstimate.parse response.body
       end
 
-      def load_async_data # :nodoc:
+      def load_async_data
         response = perform
         raise ::Carbon::QueueingFailed unless response.success? #TODO: should we expect 300s as well as 200s? Also, we may want to include response code and body in our exception.
         @data = {}
       end
 
-      def perform # :nodoc:
+      def perform
         response = nil
         if parent.timeout
           Timeout.timeout(parent.timeout) do
@@ -52,7 +52,7 @@ module Carbon
         response
       end
 
-      def perform_request # :nodoc:
+      def perform_request
         @raw_request = ::REST::Request.new :post, ::URI.parse(parent.request.url), parent.request.body, {'Content-Type' => 'application/x-www-form-urlencoded; charset=utf-8'}
         @raw_response = raw_request.perform
       end

@@ -6,6 +6,7 @@ module Carbon
     include Blockenspiel::DSL
     attr_reader :klass
     attr_reader :emitter_common_name
+    
     def initialize(klass, emitter_common_name)
       @klass = klass
       @emitter_common_name = emitter_common_name.to_s
@@ -21,7 +22,7 @@ module Carbon
       @translation_table ||= Hash.new
     end
     
-    def reset_translation_table!
+    def reset_translation_table! #:nodoc:
       @translation_table = Hash.new
     end
 

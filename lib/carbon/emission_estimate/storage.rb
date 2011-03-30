@@ -1,6 +1,6 @@
 module Carbon
   class EmissionEstimate
-    class Storage
+    class Storage #:nodoc:all
       attr_accessor :parent
       attr_reader :raw_request
       attr_reader :raw_response
@@ -10,7 +10,7 @@ module Carbon
       end
 
       def url
-        "#{::Carbon::STORAGE_URL}/#{::Digest::SHA1.hexdigest(parent.key+parent.guid)}"
+        "http://storage.carbon.brighterplanet.com/#{::Digest::SHA1.hexdigest(parent.key+parent.guid)}"
       end
 
       def present?

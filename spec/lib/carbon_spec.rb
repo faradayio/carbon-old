@@ -7,12 +7,22 @@ MISSING_UNIQUE_ID = 'd09joijdoijaloijdoais'
 OTHER_UNIQUE_ID = '1092fjoid;oijsao;ga'
 
 FakeWeb.register_uri  :post,
-                      /carbon.brighterplanet.com.automobiles/,
+                      %r{http://carbon.brighterplanet.com/automobile_trips},
                       :status => ["200", "OK"],
                       :body => {
                         'emission' => '134.599',
                         'emission_units' => 'kilograms',
                         'methodology' => 'http://carbon.brighterplanet.com/something',
+                        'active_subtimeframe' => Timeframe.new(:year => 2008)
+                      }.to_json
+#
+FakeWeb.register_uri  :post,
+                      %r{http://certified.carbon.brighterplanet.com/automobile_trips},
+                      :status => ["200", "OK"],
+                      :body => {
+                        'emission' => '54321',
+                        'emission_units' => 'kilograms',
+                        'methodology' => 'http://certified.carbon.brighterplanet.com/something',
                         'active_subtimeframe' => Timeframe.new(:year => 2008)
                       }.to_json
 #
@@ -91,7 +101,7 @@ class RentalCar
   def make
     @make ||= Make.new
   end
-  emit_as :automobile do
+  emit_as :automobile_trip do
     provide :make
     provide :model
     provide :model_year
@@ -313,6 +323,17 @@ describe Carbon do
       c.emission_estimate.request.body.should_not include('&&')
       c.emission_estimate.request.body.should_not =~ /=[^a-z0-9]/i
     end
+    
+    it 'should do certified calculations' do
+      c = RentalCar.new
+      c.emission_estimate.certified = true
+      c.emission_estimate.should == 54321
+    end
+    
+    it 'should do certified calculations (inline)' do
+      c = RentalCar.new
+      c.emission_estimate(:certified => true).should == 54321
+    end
   end
   
   describe 'asynchronous (queued) requests' do
@@ -320,6 +341,19 @@ describe Carbon do
       c = RentalCar.new
       c.emission_estimate.callback = CALLBACK_URL
       c.emission_estimate.request.url.should =~ /queue.amazonaws.com/
+    end
+    
+    it 'should default to non-certified' do
+      c = RentalCar.new
+      c.emission_estimate.callback = CALLBACK_URL
+      c.emission_estimate.request.url.should_not =~ /certified/
+    end
+
+    it 'should accept certified' do
+      c = RentalCar.new
+      c.emission_estimate.callback = CALLBACK_URL
+      c.emission_estimate.certified = true
+      c.emission_estimate.request.url.should =~ /certified/
     end
     
     it 'should have nil data in its response' do

@@ -11,10 +11,10 @@ module Carbon
   #
   # At the same time, they contain all the data you get back from the emission estimate web service. For example, you could say <tt>puts my_donut_factor.emission_estimate.oven_count</tt> (see the tests) and you'd get back the oven count used in the calculation, if any.
   class EmissionEstimate
-    def self.parse(str)
+    def self.parse(str) #:nodoc:
       data = ::ActiveSupport::JSON.decode str
       data['active_subtimeframe'] = ::Timeframe.interval(data['active_subtimeframe']) if data.has_key? 'active_subtimeframe'
-      data['updated_at'] = ::Time.parse(data['updated_at']) if data.has_key? 'updated_at'
+      data['updated_at'] = ::Time.parse(data['updated_at']) if data.has_key?('updated_at') and data['updated_at'].is_a?(::String)
       data
     end
 
@@ -24,6 +24,7 @@ module Carbon
     attr_writer :defer
     attr_accessor :callback
     attr_accessor :timeframe
+    attr_accessor :certified
     attr_accessor :guid
     attr_reader :emitter
     
@@ -32,8 +33,9 @@ module Carbon
       take_options options unless options.empty?
     end
     
-    VALID_OPTIONS = [:callback_content_type, :key, :callback, :timeframe, :guid, :timeout, :defer]
-    def take_options(options)
+    VALID_OPTIONS = [:callback_content_type, :key, :callback, :timeframe, :guid, :timeout, :defer, :certified]
+    
+    def take_options(options) #:nodoc:
       return if options.blank?
       options.slice(*VALID_OPTIONS).each do |k, v|
         instance_variable_set "@#{k}", v
@@ -66,7 +68,7 @@ module Carbon
       end
     end
     
-    def data
+    def data #:nodoc:
       if storage.present?
         storage.data
       else
@@ -74,18 +76,18 @@ module Carbon
       end
     end
 
-    def storage
+    def storage #:nodoc:
       @storage ||= {}
       return @storage[guid] if @storage.has_key? guid
       @storage[guid] = Storage.new self
     end
 
-    def request
+    def request #:nodoc:
       @request ||= Request.new self
     end
 
     # Here's where caching takes place.
-    def response
+    def response #:nodoc:
       current_params = request.params
       @response ||= {}
       return @response[current_params] if @response.has_key? current_params
@@ -94,15 +96,19 @@ module Carbon
       @response[current_params] = response_object
     end
 
-    def defer?
+    def certified? #:nodoc:
+      !!certified
+    end
+
+    def defer? #:nodoc:
       @defer == true
     end
 
-    def async?
+    def async? #:nodoc:
       callback or defer?
     end
 
-    def mode
+    def mode #:nodoc:
       async? ? :async : :realtime
     end
 

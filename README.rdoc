@@ -180,6 +180,12 @@ Without <tt>AutomobileMake#to_characteristic</tt>, the library would have no way
     
 Runs a realtime request but allows timing out the network call. Raises <tt>Timeout::Error</tt> if timeout is exceeded.
 
+== Certified calculations
+
+You can run {certified calculations}[http://brighterplanet.com/certified] by setting <tt>certified</tt> to true.
+
+    > RentalCar.new.emission_estimate :certified => true
+
 == Persisted queries
 
 You can specify that the result be persisted in low-latency storage so that future identical requests can use the same estimate:
