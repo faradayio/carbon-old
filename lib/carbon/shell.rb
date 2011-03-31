@@ -1,5 +1,6 @@
 require 'brighter_planet_metadata'
 require 'bombshell'
+require 'conversions'
 module Carbon
   class Shell < Bombshell::Environment
     include Bombshell::Shell

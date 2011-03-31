@@ -8,7 +8,8 @@ RSpec::Core::RakeTask.new('examples') do |c|
   c.rspec_opts = '-Ispec'
 end
 
-task :default => :examples
+task :test => [:examples, :cucumber]
+task :default => :test
 
 desc "Run specs with RCov"
 RSpec::Core::RakeTask.new(:examples_with_coverage) do |t|
@@ -26,3 +27,7 @@ Rake::RDocTask.new do |rdoc|
   rdoc.rdoc_files.include('README*')
   rdoc.rdoc_files.include('lib/**/*.rb')
 end
+
+require 'cucumber/rake/task'
+Cucumber::Rake::Task.new
+

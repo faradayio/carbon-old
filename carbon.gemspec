@@ -29,4 +29,5 @@ Gem::Specification.new do |s|
   s.add_dependency 'bombshell'
   s.add_development_dependency 'fakeweb'
   s.add_development_dependency 'rspec'
+  s.add_development_dependency 'aruba'
 end
