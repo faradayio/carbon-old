@@ -1,7 +1,9 @@
 module Carbon
-  module Cli
-    class Emitter < Environment
+  class Shell
+    class Emitter < Bombshell::Environment
+      include Bombshell::Shell
       include Carbon
+      
       def initialize(name, input = {})
         @emitter = name
         @input = input
@@ -118,12 +120,20 @@ module Carbon
         puts "  => #{@characteristics.keys.join ', '}"
       end
       
-      def to_s
-        if @timeframe
-          "#{@emitter}[#{@timeframe}]*"
+      prompt_with do |emitter|
+        if emitter._timeframe
+          "#{emitter._name}[#{emitter._timeframe}]*"
         else          
-          "#{@emitter}*"
+          "#{emitter._name}*"
         end
+      end
+      
+      def _name
+        @emitter
+      end
+      
+      def _timeframe
+        @timeframe
       end
       
       def inspect
@@ -134,7 +144,13 @@ module Carbon
         $emitters[@emitter] ||= []
         $emitters[@emitter] << @input
         puts "  => Saved as #{@emitter} ##{$emitters[@emitter].length - 1}"
-        throw :IRB_EXIT
+        quit
+      end
+      
+      class << self
+        def emitter_name
+          @name
+        end
       end
     end
   end

@@ -17,6 +17,7 @@ require 'active_support/version'
 }.each do |active_support_3_requirement|
   require active_support_3_requirement
 end if ActiveSupport::VERSION::MAJOR == 3
+
 require 'carbon/base'
 require 'carbon/emission_estimate'
 require 'logger'
