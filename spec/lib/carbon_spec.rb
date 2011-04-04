@@ -337,7 +337,7 @@ describe Carbon do
 
     it 'complies to given standards' do
       c = RentalCar.new
-      c.emission_estimate(:complies => :iso).request.body.should =~ /complies=iso/
+      c.emission_estimate(:comply => :iso).request.body.should =~ /comply=iso/
     end
   end
   

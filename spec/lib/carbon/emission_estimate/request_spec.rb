@@ -20,8 +20,8 @@ describe Carbon::EmissionEstimate::Request do
       request.params
     end
     it 'includes compliance' do
-      emission_estimate.complies = :iso
-      request.params.should include(:complies => :iso)
+      emission_estimate.comply = :iso
+      request.params.should include(:comply => :iso)
     end
   end
 
