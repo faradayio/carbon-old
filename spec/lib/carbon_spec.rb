@@ -334,6 +334,11 @@ describe Carbon do
       c = RentalCar.new
       c.emission_estimate(:certified => true).should == 54321
     end
+
+    it 'complies to given standards' do
+      c = RentalCar.new
+      c.emission_estimate(:complies => :iso).request.body.should =~ /complies=iso/
+    end
   end
   
   describe 'asynchronous (queued) requests' do
