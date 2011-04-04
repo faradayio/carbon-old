@@ -72,6 +72,7 @@ module Carbon
         end
         hash[:timeframe] = parent.timeframe if parent.timeframe
         hash[:key] = parent.key if parent.key
+        hash[:comply] = parent.comply if parent.comply
         hash
       end
 

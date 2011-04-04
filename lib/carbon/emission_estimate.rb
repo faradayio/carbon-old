@@ -26,6 +26,7 @@ module Carbon
     attr_accessor :timeframe
     attr_accessor :certified
     attr_accessor :guid
+    attr_accessor :comply
     attr_reader :emitter
     
     def initialize(emitter, options = {})
@@ -33,7 +34,7 @@ module Carbon
       take_options options unless options.empty?
     end
     
-    VALID_OPTIONS = [:callback_content_type, :key, :callback, :timeframe, :guid, :timeout, :defer, :certified]
+    VALID_OPTIONS = [:callback_content_type, :key, :callback, :timeframe, :guid, :timeout, :defer, :certified, :comply]
     
     def take_options(options) #:nodoc:
       return if options.blank?
