@@ -14,8 +14,6 @@ require 'active_support/version'
   require active_support_3_requirement
 end if ActiveSupport::VERSION::MAJOR >= 3
 
-require 'carbon/base'
-require 'carbon/emission_estimate'
 require 'logger'
 
 # A module (aka mixin) that lets you estimate carbon emissions by querying the {Brighter Planet carbon middleware emission estimate web service}[http://carbon.brighterplanet.com].
@@ -38,8 +36,11 @@ require 'logger'
 #
 # Once you've mixed in <tt>Carbon</tt>, you get the method <tt>emission_estimate</tt>, which you can call at any time to request an emission estimate.
 module Carbon
+  autoload :Base, 'carbon/base'
+  autoload :EmissionEstimate, 'carbon/emission_estimate'
+  autoload :Registry, 'carbon/registry'
+  
   def self.included(klass) # :nodoc:
-    klass.cattr_accessor :carbon_base
     klass.extend ClassMethods
   end
   
@@ -78,11 +79,15 @@ module Carbon
     #     provide :make
     #   end
     def emit_as(emitter_common_name, &block)
-      self.carbon_base = ::Carbon::Base.new self, emitter_common_name
+      Registry.instance[name] = ::Carbon::Base.new emitter_common_name
       ::Blockenspiel.invoke block, carbon_base
     end
     # Third-person singular preferred.
     alias :emits_as :emit_as
+    
+    def carbon_base # :nodoc:
+      Registry.instance[name]
+    end
   end
 
   # Returns an emission estimate.

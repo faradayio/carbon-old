@@ -4,11 +4,9 @@ module Carbon
   # An instance of this appears on any class that includes <tt>Carbon</tt>.
   class Base
     include Blockenspiel::DSL
-    attr_reader :klass
     attr_reader :emitter_common_name
     
-    def initialize(klass, emitter_common_name)
-      @klass = klass
+    def initialize(emitter_common_name)
       @emitter_common_name = emitter_common_name.to_s
     end
 
