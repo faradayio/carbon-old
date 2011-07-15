@@ -6,17 +6,13 @@ require 'rest'    # provided by nap gem
 require 'active_support'
 require 'active_support/version'
 %w{
-  active_support/core_ext/module/attribute_accessors
-  active_support/core_ext/class/attribute_accessors
-  active_support/core_ext/hash/keys
-  active_support/core_ext/hash/reverse_merge
-  active_support/core_ext/object/to_query
+  active_support/core_ext
   active_support/inflector
   active_support/inflector/inflections
   active_support/json/decoding
 }.each do |active_support_3_requirement|
   require active_support_3_requirement
-end if ActiveSupport::VERSION::MAJOR == 3
+end if ActiveSupport::VERSION::MAJOR >= 3
 
 require 'carbon/base'
 require 'carbon/emission_estimate'
