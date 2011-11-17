@@ -13,8 +13,10 @@ module Carbon
     
     def self.parse(str) #:nodoc:
       data = ::ActiveSupport::JSON.decode str
-      # TODO rename to timeframe
-      data['active_subtimeframe'] = ::Timeframe.interval(data['active_subtimeframe']) if data.has_key? 'active_subtimeframe'
+      if data.has_key? 'active_subtimeframe'
+        interval = "#{data['active_subtimeframe']['startDate']}/#{data['active_subtimeframe']['endDate']}"
+        data['active_subtimeframe'] = Timeframe.interval(interval)
+      end
       data['updated_at'] = ::Time.parse(data['updated_at']) if data.has_key?('updated_at') and data['updated_at'].is_a?(::String)
       data
     end

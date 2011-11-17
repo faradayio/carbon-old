@@ -1,0 +1,44 @@
+---
+- !ruby/struct:VCR::HTTPInteraction
+  request: !ruby/struct:VCR::Request
+    method: :post
+    uri: http://carbon.brighterplanet.com:80/residences.json
+    body: !!null 
+    headers:
+      content-type:
+      - application/x-www-form-urlencoded
+  response: !ruby/struct:VCR::Response
+    status: !ruby/struct:VCR::ResponseStatus
+      code: 200
+      message: OK
+    headers:
+      server:
+      - nginx/0.7.67
+      date:
+      - Thu, 17 Nov 2011 16:06:52 GMT
+      content-type:
+      - application/json
+      transfer-encoding:
+      - chunked
+      connection:
+      - keep-alive
+      status:
+      - 200 OK
+    body: ! '{"emission":3913.377091407546,"emitter":"Residence","timeframe":"2011-01-01/2012-01-01","emission_units":"kilograms","methodology":"http://impact.brighterplanet.com/residences","execution_id":"UNSUPPORTED","scope":null,"complies":[],"errors":[],"equivalents":{"cars_off_the_road_for_a_year":0.7122346306361733,"cars_off_the_road_for_a_month":8.538988813451265,"cars_off_the_road_for_a_week":37.000980399258346,"cars_off_the_road_for_a_day":259.71518404835314,"cars_to_priuses_for_a_year":1.4244692612723466,"cars_to_priuses_for_a_month":17.07797762690253,"cars_to_priuses_for_a_week":74.00196079851669,"cars_to_priuses_for_a_day":519.4303680967063,"one_way_domestic_flight":12.718475547074522,"round_trip_domestic_flight":6.359237773537261,"one_way_cross_country_flight":4.469076638387417,"round_trip_cross_country_flight":2.2345383191937085,"vegan_meals_instead_of_non_vegan_ones":3149.043671553464,"days_of_veganism":1049.6812238511545,"weeks_of_veganism":149.95278338855434,"months_of_veganism":34.98950457427486,"years_of_veganism":2.876332162184546,"barrels_of_petroleum":9.10251511461395,"canisters_of_bbq_propane":163.05868326767822,"railroad_cars_full_of_coal":0.01956688545703773,"homes_energy_in_a_year":0.3795975778665319,"homes_energy_in_a_month":4.535604048941346,"homes_energy_in_a_week":19.64906637595729,"homes_energy_in_a_day":137.93480234084177,"homes_electricity_in_a_year":0.5752664324369092,"homes_electricity_in_a_month":6.883630303785873,"homes_electricity_in_a_week":29.827760190708315,"homes_electricity_in_a_day":209.3617610132123,"homes_with_lowered_thermostat_2_degrees_for_a_winter":20.54131635279821,"homes_with_raised_thermostat_3_degrees_for_a_summer":9.23556993572181,"replaced_refrigerators":3.9407707310473987,"loads_of_cold_laundry":1794.526025790027,"lightbulbs_for_a_year":7.22409411073833,"lightbulbs_for_a_month":87.9140163584705,"lightbulbs_for_a_week":376.7721196065357,"lightbulbs_for_a_day":2637.416577377024,"lightbulbs_for_an_evening":15824.503377639234,"lightbulbs_to_CFLs_for_a_day":44892.21138303146,"lightbulbs_to_CFLs_for_a_week":6413.17193661104,"lightbulbs_to_CFLs_for_a_month":1496.4088723436914,"lightbulbs_to_CFLs_for_a_year":122.99352860584776,"days_with_lightbulbs_to_CFLs":997.6059148957943,"weeks_with_lightbulbs_to_CFLs":142.5134535377886,"months_with_lightbulbs_to_CFLs":33.251965145689915,"years_with_lightbulbs_to_CFLs":2.7315372098024673,"recycled_kgs_of_trash":2698.880077974671,"recycled_bags_of_trash":1495.4383548250225},"reports":[{"committee":{"name":"emission"},"conclusion":{"value":3913.377091407546,"units":"kilograms"},"quorum":{"name":"from
+      fuel and electricity use and occupation and residents"}},{"committee":{"name":"fuel_oil_consumed"},"conclusion":199.07480656200002,"quorum":{"name":"from
+      research"}},{"committee":{"name":"natural_gas_consumed"},"conclusion":42683876171.345726,"quorum":{"name":"from
+      research"}},{"committee":{"name":"propane_consumed"},"conclusion":183.25178523799994,"quorum":{"name":"from
+      research"}},{"committee":{"name":"biomass_consumed"},"conclusion":3798201078.0000005,"quorum":{"name":"from
+      research"}},{"committee":{"name":"kerosene_consumed"},"conclusion":4.050390626,"quorum":{"name":"from
+      research"}},{"committee":{"name":"coal_consumed"},"conclusion":2.871239704507795,"quorum":{"name":"from
+      research"}},{"committee":{"name":"dirty_electricity_generated"},"conclusion":11462.092843034108,"quorum":{"name":"from
+      electricity generated and green electricity"}},{"committee":{"name":"green_electricity"},"conclusion":0.0,"quorum":{"name":"default"}},{"committee":{"name":"electricity_generated"},"conclusion":11462.092843034108,"quorum":{"name":"from
+      electricity used and loss rate"}},{"committee":{"name":"electricity_used"},"conclusion":10752.83,"quorum":{"name":"from
+      research"}},{"committee":{"name":"missing_annual_energy"},"conclusion":0,"quorum":{"name":"from
+      fuel reports"}},{"committee":{"name":"electricity_loss_rate"},"conclusion":0.061879,"quorum":{"name":"default"}},{"committee":{"name":"electricity_emission_factor"},"conclusion":0.6060757767293904,"quorum":{"name":"default"}},{"committee":{"name":"occupation"},"conclusion":0.937,"quorum":{"name":"default"}},{"committee":{"name":"residents"},"conclusion":2.57,"quorum":{"name":"default"}},{"committee":{"name":"air_conditioner_use"},"conclusion":{"air_conditioner_use":{"fugitive_emission":0.4994479354338,"fugitive_emission_units":"kilograms_per_square_metre"}},"quorum":{"name":"default"}},{"committee":{"name":"predicted_fuel_shares"},"conclusion":{"fuel_oil":0.41679323558325115,"natural_gas":0.1613371881024962,"propane":0.25265921858930535,"kerosene":0.008254483221570639,"biomass":0.014356500316711278,"coal":0.0002819952830220514,"electricity":0.14631737890364346},"quorum":{"name":"from
+      research"}},{"committee":{"name":"predicted_annual_energy_consumption"},"conclusion":264563159141.1461,"quorum":{"name":"from
+      research"}},{"committee":{"name":"predicted_annual_fuel_oil_consumption"},"conclusion":199.07480656200002,"quorum":{"name":"default"}},{"committee":{"name":"predicted_annual_natural_gas_consumption"},"conclusion":42683876171.345726,"quorum":{"name":"default"}},{"committee":{"name":"predicted_annual_propane_consumption"},"conclusion":183.25178523799997,"quorum":{"name":"default"}},{"committee":{"name":"predicted_annual_kerosene_consumption"},"conclusion":4.050390626,"quorum":{"name":"default"}},{"committee":{"name":"predicted_annual_biomass_consumption"},"conclusion":3798201078.0,"quorum":{"name":"default"}},{"committee":{"name":"predicted_annual_coal_consumption"},"conclusion":2.871239704507795,"quorum":{"name":"default"}},{"committee":{"name":"predicted_annual_electricity_use"},"conclusion":10752.83,"quorum":{"name":"default"}},{"committee":{"name":"active_subtimeframe"},"conclusion":{"startDate":"2011-01-01","endDate":"2012-01-01"},"quorum":{"name":"from
+      acquisition and retirement"}},{"committee":{"name":"acquisition"},"conclusion":"2011-01-01","quorum":{"name":"from
+      retirement"}},{"committee":{"name":"retirement"},"conclusion":"2012-01-01","quorum":{"name":"from
+      acquisition"}},{"committee":{"name":"floorspace_estimate"},"conclusion":214.47688717440002,"quorum":{"name":"default"}}],"floorspace_estimate":214.47688717440002,"retirement":"2012-01-01","acquisition":"2011-01-01","active_subtimeframe":{"startDate":"2011-01-01","endDate":"2012-01-01"},"predicted_annual_electricity_use":10752.83,"predicted_annual_coal_consumption":2.871239704507795,"predicted_annual_biomass_consumption":3798201078.0,"predicted_annual_kerosene_consumption":4.050390626,"predicted_annual_propane_consumption":183.25178523799997,"predicted_annual_natural_gas_consumption":42683876171.345726,"predicted_annual_fuel_oil_consumption":199.07480656200002,"predicted_annual_energy_consumption":264563159141.1461,"predicted_fuel_shares":{"fuel_oil":0.41679323558325115,"natural_gas":0.1613371881024962,"propane":0.25265921858930535,"kerosene":0.008254483221570639,"biomass":0.014356500316711278,"coal":0.0002819952830220514,"electricity":0.14631737890364346},"air_conditioner_use":{"air_conditioner_use":{"fugitive_emission":0.4994479354338,"fugitive_emission_units":"kilograms_per_square_metre"}},"residents":2.57,"occupation":0.937,"electricity_emission_factor":0.6060757767293904,"electricity_loss_rate":0.061879,"missing_annual_energy":0,"electricity_used":10752.83,"electricity_generated":11462.092843034108,"green_electricity":0.0,"dirty_electricity_generated":11462.092843034108,"coal_consumed":2.871239704507795,"kerosene_consumed":4.050390626,"biomass_consumed":3798201078.0000005,"propane_consumed":183.25178523799994,"natural_gas_consumed":42683876171.345726,"fuel_oil_consumed":199.07480656200002,"carbon":{"value":3913.377091407546,"units":"kilograms"}}'
+    http_version: '1.1'
