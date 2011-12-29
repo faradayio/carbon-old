@@ -1,3 +1,7 @@
+require 'carbon/emission_estimate/response'
+require 'carbon/emission_estimate/request'
+require 'carbon/emission_estimate/storage'
+
 module Carbon
   # Let's start off by saying that realtime <tt>EmissionEstimate</tt> objects quack like numbers.
   #
@@ -7,12 +11,8 @@ module Carbon
   #
   # At the same time, they contain all the data you get back from the emission estimate web service. For example, you could say <tt>puts my_donut_factor.emission_estimate.oven_count</tt> (see the tests) and you'd get back the oven count used in the calculation, if any.
   class EmissionEstimate
-    autoload :Response, 'carbon/emission_estimate/response'
-    autoload :Request, 'carbon/emission_estimate/request'
-    autoload :Storage, 'carbon/emission_estimate/storage'
-    
     def self.parse(str) #:nodoc:
-      data = ::ActiveSupport::JSON.decode str
+      data = ActiveSupport::JSON.decode str
       if data.has_key? 'active_subtimeframe'
         interval = "#{data['active_subtimeframe']['startDate']}/#{data['active_subtimeframe']['endDate']}"
         data['active_subtimeframe'] = Timeframe.interval(interval)

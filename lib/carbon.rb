@@ -15,6 +15,10 @@ end
 
 require 'logger'
 
+require 'carbon/base'
+require 'carbon/emission_estimate'
+require 'carbon/registry'
+
 # A module (aka mixin) that lets you estimate carbon emissions by querying the {Brighter Planet carbon middleware emission estimate web service}[http://carbon.brighterplanet.com].
 #
 #   class RentalCar
@@ -35,10 +39,6 @@ require 'logger'
 #
 # Once you've mixed in <tt>Carbon</tt>, you get the method <tt>emission_estimate</tt>, which you can call at any time to request an emission estimate.
 module Carbon
-  autoload :Base, 'carbon/base'
-  autoload :EmissionEstimate, 'carbon/emission_estimate'
-  autoload :Registry, 'carbon/registry'
-  
   def self.included(klass) # :nodoc:
     klass.extend ClassMethods
   end
