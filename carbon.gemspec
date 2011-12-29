@@ -26,6 +26,7 @@ Gem::Specification.new do |s|
   s.add_dependency 'brighter_planet_metadata'
   s.add_dependency 'bombshell'
   s.add_development_dependency 'fakeweb'
+  s.add_development_dependency 'guard'
   s.add_development_dependency 'rspec'
   s.add_development_dependency 'aruba'
   s.add_development_dependency 'rake'
