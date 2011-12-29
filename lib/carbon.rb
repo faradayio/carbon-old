@@ -5,14 +5,13 @@ require 'digest/sha1'
 require 'rest'    # provided by nap gem
 require 'active_support'
 require 'active_support/version'
-%w{
-  active_support/core_ext
-  active_support/inflector
-  active_support/inflector/inflections
-  active_support/json/decoding
-}.each do |active_support_3_requirement|
-  require active_support_3_requirement
-end if ActiveSupport::VERSION::MAJOR >= 3
+
+if ActiveSupport::VERSION::MAJOR >= 3
+  require 'active_support/core_ext'
+  require 'active_support/inflector'
+  require 'active_support/inflector/inflections'
+  require 'active_support/json/decoding'
+end
 
 require 'logger'
 
