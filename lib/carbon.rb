@@ -78,8 +78,8 @@ module Carbon
     #     provide :make
     #   end
     def emit_as(emitter_common_name, &block)
-      Registry.instance[name] = ::Carbon::Base.new emitter_common_name
-      ::Blockenspiel.invoke block, carbon_base
+      Registry.instance[name] = Base.new emitter_common_name
+      Blockenspiel.invoke block, carbon_base
     end
     # Third-person singular preferred.
     alias :emits_as :emit_as
