@@ -20,6 +20,18 @@ describe Carbon do
       c.emission_estimate.emission_units.should == 'kilograms'
     end
   end
+
+  it 'performs one-off calculations' do
+    result = nil
+    VCR.use_cassette '2003 Acura' do
+      result = Carbon.calculate :automobile, 
+        :model => 'Acura',
+        :model_year => 2003,
+        :fuel_economy => 32
+    end
+    result.to_f.should == 1.258809844501948
+    result.emission_units.should == 'kilograms'
+  end
   
   describe 'with caching' do
     it "keeps around estimates if the parameters don't change" do
