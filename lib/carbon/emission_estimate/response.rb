@@ -14,7 +14,6 @@ module Carbon
         send "load_#{parent.mode}_data"
       end
 
-    private
       def load_realtime_data
         attempts = 0
         response = nil

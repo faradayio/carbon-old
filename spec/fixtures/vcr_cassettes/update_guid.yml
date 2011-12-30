@@ -1,0 +1,57 @@
+---
+- !ruby/struct:VCR::HTTPInteraction
+  request: !ruby/struct:VCR::Request
+    method: :get
+    uri: http://storage.carbon.brighterplanet.com:80/5d9896d36dff7ebd7676beb9548513509a864b80
+    body: !!null 
+    headers: !!null 
+  response: !ruby/struct:VCR::Response
+    status: !ruby/struct:VCR::ResponseStatus
+      code: 403
+      message: Forbidden
+    headers:
+      x-amz-request-id:
+      - 5C6589D0795DD0D8
+      x-amz-id-2:
+      - qD9qCJm6tP6E74GWi+ap9NUhf0V95dp/GNglkgJaUJzryH0G2qo9/XWsmvbMgU46
+      content-type:
+      - application/xml
+      transfer-encoding:
+      - chunked
+      date:
+      - Fri, 30 Dec 2011 20:52:37 GMT
+      server:
+      - AmazonS3
+    body: ! '<?xml version="1.0" encoding="UTF-8"?>
+
+      <Error><Code>AccessDenied</Code><Message>Access Denied</Message><RequestId>5C6589D0795DD0D8</RequestId><HostId>qD9qCJm6tP6E74GWi+ap9NUhf0V95dp/GNglkgJaUJzryH0G2qo9/XWsmvbMgU46</HostId></Error>'
+    http_version: '1.1'
+- !ruby/struct:VCR::HTTPInteraction
+  request: !ruby/struct:VCR::Request
+    method: :post
+    uri: http://carbon.brighterplanet.com:80/factories.json
+    body: key=ABC123&oven_count=12000
+    headers:
+      content-type:
+      - application/x-www-form-urlencoded; charset=utf-8
+  response: !ruby/struct:VCR::Response
+    status: !ruby/struct:VCR::ResponseStatus
+      code: 301
+      message: Moved Permanently
+    headers:
+      server:
+      - nginx/0.7.67
+      date:
+      - Fri, 30 Dec 2011 20:52:38 GMT
+      content-type:
+      - text/plain
+      transfer-encoding:
+      - chunked
+      connection:
+      - keep-alive
+      status:
+      - 301 Moved Permanently
+      location:
+      - http://impact.brighterplanet.com/factories.json
+    body: You are being redirected to http://impact.brighterplanet.com/factories.json
+    http_version: '1.1'

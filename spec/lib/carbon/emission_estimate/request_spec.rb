@@ -2,7 +2,9 @@ require 'spec_helper'
 
 describe Carbon::EmissionEstimate::Request do
   CALLBACK_URL = 'http://www.postbin.org/1dj0146'
+  EXISTING_UNIQUE_ID = 'oisjoaioijodijaosijdoias'
 
+  let(:donut_factory) { DonutFactory.new }
   let(:emitter) do
     mock Object,
       :class => mock(Object,
@@ -24,6 +26,46 @@ describe Carbon::EmissionEstimate::Request do
     it 'includes compliance' do
       emission_estimate.comply = :iso
       request.params.should include(:comply => :iso)
+    end
+  end
+
+  describe '#async_params' do
+    let(:emission_estimate) { Carbon::EmissionEstimate.new donut_factory }
+    let(:request) { Carbon::EmissionEstimate::Request.new emission_estimate }
+
+    before do
+      emission_estimate.defer = true
+    end
+
+    it 'complains if you provide defer but not guid' do
+      lambda {
+        request.params
+      }.should raise_error(ArgumentError, /defer.*guid/i)
+    end
+    it 'complains if you provide guid and callback' do
+      emission_estimate.callback = 'foobar'
+      lambda {
+        request.params
+      }.should raise_error(ArgumentError, /callback.*defer/i)
+    end
+    it 'sends guid along with other parameters when queueing up deferred request' do
+      emission_estimate.guid = EXISTING_UNIQUE_ID
+      request.params[:MessageBody].should =~ /#{EXISTING_UNIQUE_ID.to_query(:guid)}/
+    end
+  end
+
+  describe '#_params' do
+    let(:emission_estimate) { Carbon::EmissionEstimate.new donut_factory }
+    let(:request) { Carbon::EmissionEstimate::Request.new emission_estimate }
+
+    it "uses #to_characteristic instead of #to_param if it's available" do
+      donut_factory.mixer.should_receive(:to_characteristic).and_return 'char'
+      request._params[:mixer][:upc].should == 'char'
+    end
+    it "falls back to using to_param if to_characteristic is not available" do
+      donut_factory.mixer.should_receive(:to_characteristic).and_raise NoMethodError
+      donut_factory.mixer.should_receive(:to_param).and_return 'param'
+      request._params[:mixer][:upc].should == 'param'
     end
   end
 
@@ -59,7 +101,7 @@ describe Carbon::EmissionEstimate::Request do
       d.emission_estimate.request.body.should =~ /oven_count=12000/
     end
     
-    it 'send complex params' do
+    it 'sends complex params' do
       d = DonutFactory.new
       d.mixer.upc = 123
       d.emission_estimate.request.body.should include({:mixer => { :upc => 123 }}.to_query)

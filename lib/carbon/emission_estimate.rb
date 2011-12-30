@@ -64,7 +64,7 @@ module Carbon
     def method_missing(method_id, *args, &blk)
       if !block_given? and args.empty? and data.has_key? method_id.to_s
         data[method_id.to_s]
-      elsif ::Float.method_defined? method_id
+      elsif Float.method_defined? method_id
         raise TriedToUseAsyncResponseAsNumber if mode == :async
         number.send method_id, *args, &blk
       else

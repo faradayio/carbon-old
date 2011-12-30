@@ -1,0 +1,26 @@
+---
+- !ruby/struct:VCR::HTTPInteraction
+  request: !ruby/struct:VCR::Request
+    method: :post
+    uri: https://queue.amazonaws.com:443/121562143717/cm1_production_incoming
+    body: Action=SendMessage&MessageBody=callback%3Dhttp%253A%252F%252Fwww.postbin.org%252F1dj0146%26callback_content_type%3Dapplication%252Fjson%26emitter%3Dautomobile_trip%26key%3DABC123%26model%3DAcura&Version=2009-02-01
+    headers:
+      content-type:
+      - application/x-www-form-urlencoded; charset=utf-8
+  response: !ruby/struct:VCR::Response
+    status: !ruby/struct:VCR::ResponseStatus
+      code: 200
+      message: OK
+    headers:
+      content-type:
+      - text/xml
+      transfer-encoding:
+      - chunked
+      date:
+      - Fri, 30 Dec 2011 20:52:36 GMT
+      server:
+      - AWS Simple Queue Service
+    body: ! '<?xml version="1.0"?>
+
+      <SendMessageResponse xmlns="http://queue.amazonaws.com/doc/2009-02-01/"><SendMessageResult><MD5OfMessageBody>24bd1643b64dc3c4b5851db3dc50ed61</MD5OfMessageBody><MessageId>b106d5ee-f8ac-4bf8-a924-19aaa7592315</MessageId></SendMessageResult><ResponseMetadata><RequestId>11dbba2c-dbf1-409b-9b88-3f826bfce380</RequestId></ResponseMetadata></SendMessageResponse>'
+    http_version: '1.1'

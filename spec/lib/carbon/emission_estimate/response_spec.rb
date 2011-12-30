@@ -30,4 +30,18 @@ describe Carbon::EmissionEstimate::Response do
       }.should raise_error EOFError
     end
   end
+
+  describe '#perform' do
+    it 'times out if timeout is set' do
+      parent.stub!(:timeout).and_return 1
+      Timeout.should_receive :timeout
+      response.perform
+    end
+    it 'does not time out if not timeout is set' do
+      response.stub! :perform_request
+      parent.stub!(:timeout).and_return nil
+      Timeout.should_not_receive :timeout
+      response.perform
+    end
+  end
 end

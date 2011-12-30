@@ -16,7 +16,8 @@ describe Carbon::EmissionEstimate do
     rental_car_estimate.stub!(:data).and_return({
       'active_subtimeframe' => timeframe,
       'emission' => 23.4,
-      'methodology' => 'http://example.com'
+      'methodology' => 'http://example.com',
+      'emission_units' => 'kilograms'
     })
   end
 
@@ -62,15 +63,6 @@ describe Carbon::EmissionEstimate do
       donut_estimate.key.should == 'ADifferentOne'
     end
   end
-  
-  describe '#timeout' do
-    it 'specifies a timeout' do
-      donut_estimate.timeout = 1
-      lambda {
-        donut_estimate.to_f
-      }.should raise_error(Timeout::Error)
-    end
-  end
 
   describe '#active_subtimeframe' do
     it 'proxies to the response data' do
@@ -90,10 +82,6 @@ describe Carbon::EmissionEstimate do
   end
 
   describe '#emission_units' do
-    it 'returns nil if a callback is set' do
-      rental_car_estimate.callback = CALLBACK_URL
-      rental_car_estimate.emission_units.should be_nil
-    end
     it 'proxies to the emission data' do
       rental_car_estimate.callback = nil
       rental_car_estimate.emission_units.length.should > 0
@@ -101,17 +89,13 @@ describe Carbon::EmissionEstimate do
   end
 
   describe '#methodology' do
-    it 'returns nil if a callback is set' do
-      rental_car_estimate.callback = CALLBACK_URL
-      rental_car_estimate.methodology.should be_nil
-    end
     it 'proxies to the emission data' do
       rental_car_estimate.callback = nil
       rental_car_estimate.methodology.length.should > 0
     end
   end
   
-  describe '==' do
+  describe '#==' do
     it 'provides equality for realtime requests' do
       rental_car_estimate.should == 23.4
     end
@@ -121,29 +105,24 @@ describe Carbon::EmissionEstimate do
     end
   end
   
-  it 'should not allow itself to be treated as a number' do
-    rental_car_estimate.callback = CALLBACK_URL
-    lambda {
-      rental_car_estimate + 5
-    }.should raise_error(::Carbon::TriedToUseAsyncResponseAsNumber)
-    lambda {
-      rental_car_estimate.to_f
-    }.should raise_error(::Carbon::TriedToUseAsyncResponseAsNumber)
-  end
-  
-  it "should use #to_characteristic instead of #to_param if it's available" do
-    d = DonutFactory.new
-    lambda {
-      d.mixer.to_param
-    }.should raise_error(RuntimeError, /instead please/)
-    lambda {
-      d.emission_estimate.to_f
-    }.should_not raise_error
-  end
-
-  it "raises an error on EmissionEstimate if method isn't found" do
-    lambda {
-      rental_car_estimate.foobar
-    }.should raise_error(NoMethodError, /EmissionEstimate/)
+  describe '#method_missing' do
+    before do
+      rental_car_estimate.callback = CALLBACK_URL
+    end
+    it "doesn't allow coercion to numeric in async mode" do
+      lambda {
+        rental_car_estimate + 5
+      }.should raise_error(Carbon::TriedToUseAsyncResponseAsNumber)
+    end
+    it "doesn't allow #to_f in async mode" do
+      lambda {
+        rental_car_estimate.to_f
+      }.should raise_error(Carbon::TriedToUseAsyncResponseAsNumber)
+    end
+    it "raises an error if method isn't found" do
+      lambda {
+        rental_car_estimate.foobar
+      }.should raise_error(NoMethodError, /EmissionEstimate/)
+    end
   end
 end
