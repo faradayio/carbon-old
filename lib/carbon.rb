@@ -16,6 +16,7 @@ end
 require 'logger'
 
 require 'carbon/base'
+require 'carbon/classic_api'
 require 'carbon/emission_estimate'
 require 'carbon/registry'
 
@@ -39,8 +40,12 @@ require 'carbon/registry'
 #
 # Once you've mixed in <tt>Carbon</tt>, you get the method <tt>emission_estimate</tt>, which you can call at any time to request an emission estimate.
 module Carbon
-  def self.included(klass) # :nodoc:
-    klass.extend ClassMethods
+  def self.included(target) # :nodoc:
+    target.send :include, Carbon::ClassicAPI
+  end
+
+  def self.calculate(model, params)
+
   end
   
   class RealtimeEstimateFailed < RuntimeError # :nodoc:
@@ -64,34 +69,21 @@ module Carbon
   def self.warn(msg) #:nodoc:
     log.warn msg
   end
-    
-  # You will probably never access this module directly. Instead, you'll use it through the DSL.
-  #
-  # It's mixed into any class that includes <tt>Carbon</tt>.
-  module ClassMethods
-    # Indicate that this class "emits as" an <tt>:automobile</tt>, <tt>:flight</tt>, or another of the Brighter Planet emitter classes.
-    #
-    # See the {emission estimate web service use documentation}[http://carbon.brighterplanet.com/use]
-    #
-    # For example,
-    #   emit_as :automobile do
-    #     provide :make
-    #   end
-    def emit_as(emitter_common_name, &block)
-      Registry.instance[name] = Base.new emitter_common_name
-      Blockenspiel.invoke block, carbon_base
-    end
-    # Third-person singular preferred.
-    alias :emits_as :emit_as
-    
-    def carbon_base # :nodoc:
-      Registry.instance[name]
-    end
-  end
 
   # Returns an emission estimate.
   #
   # Note: please see the README about <b>exceptions that you should watch out for</b>.
+  #
+  # Usage:
+  #
+  #   class RentalCar
+  #     include Carbon
+  #
+  #     emit_as :automobile
+  #   end
+  #   
+  #   my_car = RentalCar.new
+  #   my_car.emission_estimate
   # 
   # You can use it like a number...
   #   > my_car.emission_estimate + 5.1
