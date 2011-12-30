@@ -15,7 +15,6 @@ end
 
 require 'logger'
 
-require 'carbon/base'
 require 'carbon/classic_api'
 require 'carbon/emission_estimate'
 require 'carbon/registry'

@@ -2,7 +2,7 @@ module Carbon
   # You will probably never access this class directly. Instead, you'll touch it through the DSL.
   #
   # An instance of this appears on any class that includes <tt>Carbon</tt>.
-  class Base
+  class DSL
     include Blockenspiel::DSL
     attr_reader :emitter_common_name
     

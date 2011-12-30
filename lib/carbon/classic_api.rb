@@ -1,4 +1,4 @@
-require 'carbon/base'
+require 'carbon/dsl'
 
 module Carbon
   module ClassicAPI
@@ -16,7 +16,7 @@ module Carbon
       #     provide :make
       #   end
       def emit_as(emitter_common_name, &block)
-        Registry.instance[name] = Base.new emitter_common_name
+        Registry.instance[name] = DSL.new emitter_common_name
         Blockenspiel.invoke block, carbon_base
       end
       # Third-person singular preferred.
