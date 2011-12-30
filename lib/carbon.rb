@@ -15,7 +15,7 @@ end
 
 require 'logger'
 
-require 'carbon/classic_api'
+require 'carbon/dsl'
 require 'carbon/emission_estimate'
 require 'carbon/registry'
 
@@ -40,7 +40,7 @@ require 'carbon/registry'
 # Once you've mixed in <tt>Carbon</tt>, you get the method <tt>emission_estimate</tt>, which you can call at any time to request an emission estimate.
 module Carbon
   def self.included(target) # :nodoc:
-    target.send :include, Carbon::ClassicAPI
+    target.send :include, Carbon::DSL
   end
 
   def self.calculate(model, params)
